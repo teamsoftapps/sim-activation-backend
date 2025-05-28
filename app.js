@@ -29,7 +29,7 @@ mongoose
   });
 
 // Use API key middleware globally
-app.use(apiKeyMiddleware);
+// app.use(apiKeyMiddleware);
 
 // Import your route files
 import activateRoutes from "./src/routes/activate.js";
@@ -42,11 +42,11 @@ import signinRoutes from "./src/routes/signin.js";
 import signupRoutes from "./src/routes/signup.js";
 
 // Mount routes
-app.use("/activate", activateRoutes);
-app.use("/bulk-activate", bulkActivationRoutes);
-app.use("/change-sim-no", changeSimRoutes);
-app.use("/deactivate", deactivateRoutes);
-app.use("/reactivate", reactivateRoutes);
+app.use("/activate", apiKeyMiddleware, activateRoutes);
+app.use("/bulk-activate", apiKeyMiddleware, bulkActivationRoutes);
+app.use("/change-sim-no", apiKeyMiddleware, changeSimRoutes);
+app.use("/deactivate", apiKeyMiddleware, deactivateRoutes);
+app.use("/reactivate", apiKeyMiddleware, reactivateRoutes);
 
 app.use("/admin-user", adminUserControlRoutes); // admin user CRUD and management routes
 
