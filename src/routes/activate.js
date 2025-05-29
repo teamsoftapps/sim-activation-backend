@@ -38,11 +38,15 @@ router.post("/", async (req, res) => {
       simResponse: simResult,
       user,
     });
-  } catch (err) {
-    console.error("Error:", err);
+  } catch (error) {
+    console.error(
+      "Activation Failed:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
     res
-      .status(err.response?.status || 500)
-      .json(err.response?.data || { error: "Server error" });
+      .status(error.response?.status || 500)
+      .json(error.response?.data || { error: "Server error" });
   }
 });
 
