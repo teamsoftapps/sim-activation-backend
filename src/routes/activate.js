@@ -2,6 +2,8 @@ import express from "express";
 import axios from "axios";
 import User from "../models/User.js";
 const router = express.Router();
+import dotenv from "dotenv";
+dotenv.config();
 
 // router.post("/", async (req, res) => {
 //   console.log("request:", req.body);
@@ -26,7 +28,10 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   console.log("request:", req.body);
 
-  const { email, ...activationData } = req.body; // email ko nikal ke baaki push karenge
+  const { email, ...activationData } = req.body;
+
+  console.log("Activation Data:", activationData);
+
   if (!email) {
     return res
       .status(400)
@@ -34,35 +39,43 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // External API call (response ko sirf client ko denge)
-    const response = await axios.post(
+    // External API call using fetch
+    const response = await fetch(
       "https://api.opncomm.com/opencom/api/v1/active",
-      req.body,
       {
+        method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(req.body),
       }
     );
 
-    // User activationData array me naya object push karo
-    await User.findOneAndUpdate(
-      { email: "user@example.com" },
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json(errorData);
+    }
+
+    const apiData = await response.json();
+
+    // Push activation data to user
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
       {
         $push: {
           activationData: {
-            esn: "ABC123",
-            planId: "planX",
-            language: "en",
-            zip: "12345",
-            BillingCode: "XYZ",
+            esn: activationData.esn,
+            planId: activationData.planId,
+            language: activationData.language,
+            zip: activationData.zip,
+            BillingCode: activationData.BillingCode,
             E911ADDRESS: {
-              STREET1: "123 Main St",
-              STREET2: "Apt 4B",
-              CITY: "New York",
-              STATE: "NY",
-              ZIP: "10001",
+              STREET1: activationData.activationData?.STREET1,
+              STREET2: activationData.activationData?.STREET2,
+              CITY: activationData.activationData?.CITY,
+              STATE: activationData.activationData?.STATE,
+              ZIP: activationData.activationData?.ZIP,
             },
           },
         },
@@ -77,13 +90,11 @@ router.post("/", async (req, res) => {
     res.json({
       message: "Activation data updated successfully",
       activationData: updatedUser.activationData,
-      apiResponse: response.data,
+      apiResponse: apiData,
     });
   } catch (err) {
     console.error("Activation error:", err);
-    res
-      .status(err.response?.status || 500)
-      .json(err.response?.data || { error: err.message || "Unknown error" });
+    res.status(500).json({ error: err.message || "Unknown error" });
   }
 });
 export default router;

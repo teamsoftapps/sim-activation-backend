@@ -75,10 +75,6 @@ const Users = new mongoose.Schema({
   },
   apiKey: String,
   token: String,
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
 
   // New: Activation data field
   activationData: [
@@ -97,6 +93,10 @@ const Users = new mongoose.Schema({
       },
     },
   ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const User = mongoose.model("User", Users);
