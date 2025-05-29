@@ -1,20 +1,22 @@
-import express from "express";
-import axios from "axios";
-import User from "../models/User.js";
+/** @format */
+
+import express from 'express';
+import axios from 'axios';
+import User from '../models/User.js';
 const router = express.Router();
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 dotenv.config();
 
-router.post("/", async (req, res) => {
-  console.log("request:", req.body);
+router.post('/', async (req, res) => {
+  console.log('request:', req.body);
   try {
     const response = await axios.post(
-      "https://api.opncomm.com/opencom/api/v1/active",
+      'https://api.opncomm.com/opencom/api/v1/active',
       req.body,
       {
         headers: {
           Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
@@ -22,19 +24,19 @@ router.post("/", async (req, res) => {
   } catch (err) {
     res
       .status(err.response?.status || 500)
-      .json(err.response?.data || { error: "Unknown error" });
+      .json(err.response?.data || { error: 'Unknown error' });
   }
 });
 
-router.post("/save-activation", async (req, res) => {
-  console.log("Save Activation Request:", req.body);
+router.post('/save-activation', async (req, res) => {
+  console.log('Save Activation Request:', req.body);
 
   const { email, ...activationData } = req.body;
 
   if (!email) {
     return res
       .status(400)
-      .json({ error: "Email is required to save activation data" });
+      .json({ error: 'Email is required to save activation data' });
   }
 
   try {
@@ -62,15 +64,17 @@ router.post("/save-activation", async (req, res) => {
     );
 
     if (!updatedUser) {
-      return res.status(404).json({ error: "User not found with this email" });
+      return res.status(404).json({ error: 'User not found with this email' });
     }
 
     res.json({
-      message: "Activation data saved successfully",
+      message: 'Activation data saved successfully',
       activationData: updatedUser.activationData,
     });
   } catch (err) {
-    console.error("DB Save error:", err);
-    res.status(500).json({ error: err.message || "Unknown error" });
+    console.error('DB Save error:', err);
+    res.status(500).json({ error: err.message || 'Unknown error' });
   }
 });
+
+export default router;
