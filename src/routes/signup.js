@@ -10,23 +10,40 @@ const router = express.Router();
 router.post("/createUser", async (req, res) => {
   const { fullName, email, password, phone, activationData } = req.body;
 
+  if (!fullName || !email || !password || !phone) {
+    return res
+      .status(400)
+      .json({ success: false, message: "All required fields are missing." });
+  }
+
   try {
-    // Check existing admin and user omitted for brevity (keep your current checks)
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists with this email.",
+      });
+    }
 
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const apiKey = await generateApiKey();
+    const apiKey = await generateApiKey(); // Should return a unique string
 
+    // Build new user
     const newUser = new User({
       fullName,
       email,
       password: hashedPassword,
       phone,
       apiKey,
-      activationData: activationData || [],
+      activationData: Array.isArray(activationData) ? activationData : [], // Ensure array
     });
 
+    // Save to DB
     await newUser.save();
 
+    // Respond
     res.status(201).json({
       success: true,
       message: "User created successfully",
@@ -36,7 +53,7 @@ router.post("/createUser", async (req, res) => {
         email: newUser.email,
         phone: newUser.phone,
         apiKey: newUser.apiKey,
-        activationData: newUser.activationData, // now included
+        activationData: newUser.activationData,
       },
     });
   } catch (error) {

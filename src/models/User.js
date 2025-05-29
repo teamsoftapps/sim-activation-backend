@@ -81,7 +81,22 @@ const Users = new mongoose.Schema({
   },
 
   // New: Activation data field
-  activationData: [ActivationDataSchema],
+  activationData: [
+    {
+      esn: String,
+      planId: String,
+      language: String,
+      zip: String,
+      BillingCode: String,
+      E911ADDRESS: {
+        STREET1: String,
+        STREET2: String,
+        CITY: String,
+        STATE: String,
+        ZIP: String,
+      },
+    },
+  ],
 });
 
 const User = mongoose.model("User", Users);

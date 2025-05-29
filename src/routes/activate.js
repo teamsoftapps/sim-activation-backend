@@ -47,9 +47,26 @@ router.post("/", async (req, res) => {
     );
 
     // User activationData array me naya object push karo
-    const updatedUser = await User.findOneAndUpdate(
-      { email },
-      { $push: { activationData: activationData } },
+    await User.findOneAndUpdate(
+      { email: "user@example.com" },
+      {
+        $push: {
+          activationData: {
+            esn: "ABC123",
+            planId: "planX",
+            language: "en",
+            zip: "12345",
+            BillingCode: "XYZ",
+            E911ADDRESS: {
+              STREET1: "123 Main St",
+              STREET2: "Apt 4B",
+              CITY: "New York",
+              STATE: "NY",
+              ZIP: "10001",
+            },
+          },
+        },
+      },
       { new: true }
     );
 
