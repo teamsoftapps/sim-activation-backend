@@ -26,10 +26,8 @@
 // });
 
 import { v4 as uuidv4 } from "uuid";
-import ApiKey from "../models/ApiKey.js";
 
 export async function generateApiKey() {
   const key = uuidv4();
-  const newKey = new ApiKey({ key });
   return key;
 }

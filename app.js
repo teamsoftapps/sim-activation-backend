@@ -25,13 +25,9 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => {
     console.error("❌ Failed to connect to MongoDB:", err.message);
-    process.exit(1); // Optional but recommended
+    process.exit(1);
   });
 
-// Use API key middleware globally
-// app.use(apiKeyMiddleware);
-
-// Import your route files
 import activateRoutes from "./src/routes/activate.js";
 import adminUserControlRoutes from "./src/routes/adminUserControlRoutes.js";
 import bulkActivationRoutes from "./src/routes/bulkActivate.js";
@@ -41,14 +37,13 @@ import reactivateRoutes from "./src/routes/reactivate.js";
 import signinRoutes from "./src/routes/signin.js";
 import signupRoutes from "./src/routes/signup.js";
 
-// Mount routes
 app.use("/activate", apiKeyMiddleware, activateRoutes);
 app.use("/bulk-activate", apiKeyMiddleware, bulkActivationRoutes);
 app.use("/change-sim-no", apiKeyMiddleware, changeSimRoutes);
 app.use("/deactivate", apiKeyMiddleware, deactivateRoutes);
 app.use("/reactivate", apiKeyMiddleware, reactivateRoutes);
 
-app.use("/admin-user", adminUserControlRoutes); // admin user CRUD and management routes
+app.use("/admin-user", adminUserControlRoutes);
 
 app.use("/auth", signinRoutes);
 app.use("/auth/signup", signupRoutes);
