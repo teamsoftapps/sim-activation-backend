@@ -93,6 +93,22 @@ const Users = new mongoose.Schema({
       },
     },
   ],
+  deactivationData: [
+    {
+      esn: String,
+      mdn: String,
+    },
+  ],
+  reactivation: [
+    {
+      esn: String,
+      mdn: String,
+      plan: String,
+      zip: String,
+      BillingCode: String,
+    },
+  ],
+
   createdAt: {
     type: Date,
     default: Date.now,
