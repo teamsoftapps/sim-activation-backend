@@ -5,61 +5,39 @@ const router = express.Router();
 import dotenv from "dotenv";
 dotenv.config();
 
-// router.post("/", async (req, res) => {
-//   console.log("request:", req.body);
-//   try {
-//     const response = await axios.post(
-//       "https://api.opncomm.com/opencom/api/v1/active",
-//       req.body,
-//       {
-//         headers: {
-//           Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-//     res.json(response.data);
-//   } catch (err) {
-//     res
-//       .status(err.response?.status || 500)
-//       .json(err.response?.data || { error: "Unknown error" });
-//   }
-// });
 router.post("/", async (req, res) => {
   console.log("request:", req.body);
-
-  const { email, ...activationData } = req.body;
-
-  console.log("Activation Data:", activationData);
-
-  if (!email) {
-    return res
-      .status(400)
-      .json({ error: "Email is required to update activationData" });
-  }
-
   try {
-    // External API call using fetch
-    const response = await fetch(
+    const response = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/active",
+      req.body,
       {
-        method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(req.body),
       }
     );
+    res.json(response.data);
+  } catch (err) {
+    res
+      .status(err.response?.status || 500)
+      .json(err.response?.data || { error: "Unknown error" });
+  }
+});
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return res.status(response.status).json(errorData);
-    }
+router.post("/save-activation", async (req, res) => {
+  console.log("Save Activation Request:", req.body);
 
-    const apiData = await response.json();
+  const { email, ...activationData } = req.body;
 
-    // Push activation data to user
+  if (!email) {
+    return res
+      .status(400)
+      .json({ error: "Email is required to save activation data" });
+  }
+
+  try {
     const updatedUser = await User.findOneAndUpdate(
       { email },
       {
@@ -71,11 +49,11 @@ router.post("/", async (req, res) => {
             zip: activationData.zip,
             BillingCode: activationData.BillingCode,
             E911ADDRESS: {
-              STREET1: activationData.activationData?.STREET1,
-              STREET2: activationData.activationData?.STREET2,
-              CITY: activationData.activationData?.CITY,
-              STATE: activationData.activationData?.STATE,
-              ZIP: activationData.activationData?.ZIP,
+              STREET1: activationData.E911ADDRESS?.STREET1,
+              STREET2: activationData.E911ADDRESS?.STREET2,
+              CITY: activationData.E911ADDRESS?.CITY,
+              STATE: activationData.E911ADDRESS?.STATE,
+              ZIP: activationData.E911ADDRESS?.ZIP,
             },
           },
         },
@@ -88,13 +66,11 @@ router.post("/", async (req, res) => {
     }
 
     res.json({
-      message: "Activation data updated successfully",
+      message: "Activation data saved successfully",
       activationData: updatedUser.activationData,
-      apiResponse: apiData,
     });
   } catch (err) {
-    console.error("Activation error:", err);
+    console.error("DB Save error:", err);
     res.status(500).json({ error: err.message || "Unknown error" });
   }
 });
-export default router;
