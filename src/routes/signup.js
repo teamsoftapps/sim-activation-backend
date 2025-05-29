@@ -22,7 +22,7 @@ router.post("/createUser", async (req, res) => {
       password: hashedPassword,
       phone,
       apiKey,
-      activationData: activationData || {}, // default empty object if not provided
+      activationData: activationData || [],
     });
 
     await newUser.save();

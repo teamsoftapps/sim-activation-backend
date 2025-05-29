@@ -81,7 +81,7 @@ const Users = new mongoose.Schema({
   },
 
   // New: Activation data field
-  activationData: ActivationDataSchema,
+  activationData: [ActivationDataSchema],
 });
 
 const User = mongoose.model("User", Users);
