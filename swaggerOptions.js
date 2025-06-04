@@ -9,7 +9,7 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000", // Adjust if you're deploying
+        url: "https://sim-activation-backend.vercel.app/", // Adjust if you're deploying
       },
     ],
     components: {
