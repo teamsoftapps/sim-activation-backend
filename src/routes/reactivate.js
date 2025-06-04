@@ -1,8 +1,47 @@
+/** @format */
+
 import express from "express";
 import axios from "axios";
 import User from "../models/User.js";
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Reactivation
+ *   description: Reactivate SIM cards and store reactivation records
+ */
+
+/**
+ * @swagger
+ * /reactivate:
+ *   post:
+ *     summary: Reactivate a SIM card
+ *     tags: [Reactivation]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               esn: "123456789012345"
+ *               mdn: "9876543210"
+ *     responses:
+ *       200:
+ *         description: SIM reactivated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 router.post("/", async (req, res) => {
   try {
     const response = await axios.post(
@@ -23,6 +62,53 @@ router.post("/", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /reactivate/save-reactivation:
+ *   post:
+ *     summary: Save SIM reactivation data to the user profile
+ *     tags: [Reactivation]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               esn:
+ *                 type: string
+ *                 example: "123456789012345"
+ *               mdn:
+ *                 type: string
+ *                 example: "9876543210"
+ *               plan:
+ *                 type: string
+ *                 example: "Basic Plan"
+ *               zip:
+ *                 type: string
+ *                 example: "90210"
+ *               BillingCode:
+ *                 type: string
+ *                 example: "ABC123"
+ *     responses:
+ *       200:
+ *         description: Reactivation data saved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Email is required
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server/database error
+ */
 router.post("/save-reactivation", async (req, res) => {
   console.log("Save Reactivation Request:", req.body);
 

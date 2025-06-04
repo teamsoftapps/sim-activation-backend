@@ -6,7 +6,126 @@ import { generateApiKey } from "../utils/generateApiKey.js";
 
 const router = express.Router();
 
-// ✅ Create User with email uniqueness across roles
+/**
+ * @swagger
+ * tags:
+ *   name: Users
+ *   description: User and Admin account management
+ */
+
+/**
+ * @swagger
+ * /auth/signup/createUser:
+ *   post:
+ *     summary: Create a new user account
+ *     tags: [Users]
+ *     requestBody:
+ *       description: User details for registration
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - password
+ *               - phone
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: johndoe@example.com
+ *               password:
+ *                 type: string
+ *                 example: mySecurePass123
+ *               phone:
+ *                 type: string
+ *                 example: "+1234567890"
+ *               activationData:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                 description: Optional activation-related data
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: User created successfully
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 60d0fe4f5311236168a109ca
+ *                     fullName:
+ *                       type: string
+ *                       example: John Doe
+ *                     email:
+ *                       type: string
+ *                       example: johndoe@example.com
+ *                     phone:
+ *                       type: string
+ *                       example: "+1234567890"
+ *                     apiKey:
+ *                       type: string
+ *                       example: abcd1234apikey5678
+ *                     activationData:
+ *                       type: array
+ *                       description: Activation-related data
+ *       400:
+ *         description: Missing required fields
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: All required fields are missing.
+ *       409:
+ *         description: User already exists
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: User already exists with this email.
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ */
+
 router.post("/createUser", async (req, res) => {
   const { fullName, email, password, phone, activationData } = req.body;
 
@@ -62,9 +181,103 @@ router.post("/createUser", async (req, res) => {
   }
 });
 
-// ✅ Create Admin with email uniqueness across roles
+/**
+ * @swagger
+ * /auth/signup/createAdmin:
+ *   post:
+ *     summary: Create a new admin account
+ *     tags: [Users]
+ *     requestBody:
+ *       description: Admin details for registration
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - fullName
+ *               - email
+ *               - password
+ *               - phone
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: Admin User
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: admin@example.com
+ *               password:
+ *                 type: string
+ *                 example: adminPass456
+ *               phone:
+ *                 type: string
+ *                 example: "+1234567890"
+ *     responses:
+ *       201:
+ *         description: Admin created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Admin created successfully
+ *                 admin:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: 60d0fe4f5311236168a109ca
+ *                     fullName:
+ *                       type: string
+ *                       example: Admin User
+ *                     email:
+ *                       type: string
+ *                       example: admin@example.com
+ *                     phone:
+ *                       type: string
+ *                       example: "+1234567890"
+ *       400:
+ *         description: Email already in use
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Email already in use as a user account
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Server error
+ */
+
 router.post("/createAdmin", async (req, res) => {
   const { fullName, email, password, phone } = req.body;
+
+  if (!fullName || !email || !password || !phone) {
+    return res
+      .status(400)
+      .json({ success: false, message: "All required fields are missing." });
+  }
 
   try {
     // Check if email exists in User collection

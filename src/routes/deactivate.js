@@ -1,8 +1,47 @@
+/** @format */
+
 import express from "express";
 import axios from "axios";
 import User from "../models/User.js";
 const router = express.Router();
 
+/**
+ * @swagger
+ * tags:
+ *   name: Deactivation
+ *   description: Deactivate SIM cards and store deactivation records
+ */
+
+/**
+ * @swagger
+ * /deactivate:
+ *   post:
+ *     summary: Deactivate a SIM card
+ *     tags: [Deactivation]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               esn: "123456789012345"
+ *               mdn: "9876543210"
+ *     responses:
+ *       200:
+ *         description: SIM deactivated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 router.post("/", async (req, res) => {
   try {
     const response = await axios.post(
@@ -23,6 +62,44 @@ router.post("/", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /deactivate/save-deactivation:
+ *   post:
+ *     summary: Save SIM deactivation data to the user profile
+ *     tags: [Deactivation]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               esn:
+ *                 type: string
+ *                 example: "123456789012345"
+ *               mdn:
+ *                 type: string
+ *                 example: "9876543210"
+ *     responses:
+ *       200:
+ *         description: Deactivation data saved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       400:
+ *         description: Email is required
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server/database error
+ */
 router.post("/save-deactivation", async (req, res) => {
   console.log("Save Deactivation Request:", req.body);
 

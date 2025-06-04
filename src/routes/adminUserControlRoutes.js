@@ -1,3 +1,5 @@
+/** @format */
+
 import express from "express";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
@@ -6,7 +8,27 @@ import bcrypt from "bcrypt";
 
 const router = express.Router();
 
-// ✅ Get all users
+/**
+ * @swagger
+ * tags:
+ *   name: Admin Users
+ *   description: Admin operations for managing users
+ */
+
+/**
+ * @swagger
+ * /admin-user/users:
+ *   get:
+ *     summary: Get all users (admin only)
+ *     tags: [Admin Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of users
+ *       500:
+ *         description: Server error
+ */
 router.get("/users", isAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -16,7 +38,29 @@ router.get("/users", isAdmin, async (req, res) => {
   }
 });
 
-// ✅ Get a single user by ID
+/**
+ * @swagger
+ * /admin-user/users/{id}:
+ *   get:
+ *     summary: Get a single user by ID (admin only)
+ *     tags: [Admin Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User details
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.get("/users/:id", isAdmin, async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -31,14 +75,53 @@ router.get("/users/:id", isAdmin, async (req, res) => {
   }
 });
 
-// ✅ Update user
+/**
+ * @swagger
+ * /admin-user/users/{id}:
+ *   put:
+ *     summary: Update a user's details (admin only)
+ *     tags: [Admin Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               fullName:
+ *                 type: string
+ *                 example: John Doe
+ *               email:
+ *                 type: string
+ *                 example: john@example.com
+ *               phone:
+ *                 type: string
+ *                 example: "1234567890"
+ *               newPassword:
+ *                 type: string
+ *                 example: newsecurepassword123
+ *     responses:
+ *       200:
+ *         description: User updated successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.put("/users/:id", isAdmin, async (req, res) => {
   try {
     const { fullName, email, phone, newPassword } = req.body;
 
-    // Prepare an update object
     const updateFields = {};
-
     if (fullName) updateFields.fullName = fullName;
     if (email) updateFields.email = email;
     if (phone) updateFields.phone = phone;
@@ -52,7 +135,7 @@ router.put("/users/:id", isAdmin, async (req, res) => {
       req.params.id,
       updateFields,
       { new: true }
-    ).select("-password"); // exclude password from response
+    ).select("-password");
 
     if (!updatedUser) {
       return res
@@ -71,7 +154,29 @@ router.put("/users/:id", isAdmin, async (req, res) => {
   }
 });
 
-// ✅ Delete user
+/**
+ * @swagger
+ * /admin-user/users/{id}:
+ *   delete:
+ *     summary: Delete a user by ID (admin only)
+ *     tags: [Admin Users]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User deleted successfully
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
 router.delete("/users/:id", isAdmin, async (req, res) => {
   try {
     const deletedUser = await User.findByIdAndDelete(req.params.id);
