@@ -89,6 +89,7 @@ import deactivateRoutes from "./src/routes/deactivate.js";
 import reactivateRoutes from "./src/routes/reactivate.js";
 import signinRoutes from "./src/routes/signin.js";
 import signupRoutes from "./src/routes/signup.js";
+import purchasePlan from "./src/routes/purchasePlan.js";
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use(express.json());
@@ -163,6 +164,7 @@ app.use("/bulk-activate", apiKeyMiddleware, bulkActivationRoutes);
 app.use("/change-sim-no", apiKeyMiddleware, changeSimRoutes);
 app.use("/deactivate", apiKeyMiddleware, deactivateRoutes);
 app.use("/reactivate", apiKeyMiddleware, reactivateRoutes);
+app.use("/purchasePlan", apiKeyMiddleware, purchasePlan);
 
 app.use("/admin-user", adminUserControlRoutes);
 app.use("/auth", signinRoutes);
