@@ -1,6 +1,42 @@
+/** @format */
+
 import express from "express";
 import axios from "axios";
 const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: AT&T Reactivate Subscriber
+ *   description: Endpoints related to reactivating AT&T subscribers
+ */
+
+/**
+ * @swagger
+ * /at&t/reactivate-subscriber:
+ *   post:
+ *     summary: Reactivate an AT&T subscriber via external API
+ *     tags: [AT&T Reactivate Subscriber]
+ *     security:
+ *       - bearerAuth: []  # Requires API key and token middleware
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               msisdn: "2133616694"
+ *               reason_code: "RD"
+ *     responses:
+ *       200:
+ *         description: Reactivation successful
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 
 router.post("/", async (req, res) => {
   try {
@@ -21,4 +57,5 @@ router.post("/", async (req, res) => {
       .json(err.response?.data || { error: "Unknown error" });
   }
 });
+
 export default router;

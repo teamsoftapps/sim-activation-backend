@@ -1,6 +1,46 @@
+/** @format */
+
 import express from "express";
 import axios from "axios";
 const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: AT&T Activate New Subscriber
+ *   description: Endpoints related to activating new AT&T subscribers
+ */
+
+/**
+ * @swagger
+ * /at&t/active-new-subscriber:
+ *   post:
+ *     summary: Activate a new AT&T subscriber via external API
+ *     tags: [AT&T Activate New Subscriber]
+ *     security:
+ *       - bearerAuth: []  # Requires API key and token middleware
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               partner_transaction_id: "TransID123"
+ *               imei: "357836103948576"
+ *               sim: "89012802331277820666"
+ *               zip_code: "10036"
+ *               plan_code: "Plan1"
+ *               billing_code: ""
+ *     responses:
+ *       200:
+ *         description: Activation successful
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 
 router.post("/", async (req, res) => {
   try {
@@ -21,4 +61,5 @@ router.post("/", async (req, res) => {
       .json(err.response?.data || { error: "Unknown error" });
   }
 });
+
 export default router;

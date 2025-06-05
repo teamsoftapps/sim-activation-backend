@@ -1,6 +1,42 @@
+/** @format */
+
 import express from "express";
 import axios from "axios";
 const router = express.Router();
+
+/**
+ * @swagger
+ * tags:
+ *   name: AT&T Deactivate Subscriber
+ *   description: Endpoints related to deactivating AT&T subscribers
+ */
+
+/**
+ * @swagger
+ * /at&t/deactivate-subscriber:
+ *   post:
+ *     summary: Deactivate an AT&T subscriber via external API
+ *     tags: [AT&T Deactivate Subscriber]
+ *     security:
+ *       - bearerAuth: []  # Requires API key and token middleware
+ *       - apiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               msisdn: "2133616694"
+ *               reason_code: "RD"
+ *     responses:
+ *       200:
+ *         description: Deactivation successful
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Internal server error
+ */
 
 router.post("/", async (req, res) => {
   try {
@@ -21,4 +57,5 @@ router.post("/", async (req, res) => {
       .json(err.response?.data || { error: "Unknown error" });
   }
 });
+
 export default router;
