@@ -102,6 +102,10 @@ mongoose
     process.exit(1);
   });
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 //API Routes
 app.use("/activate", apiKeyMiddleware, activateRoutes);
 app.use("/bulk-activate", apiKeyMiddleware, bulkActivationRoutes);
