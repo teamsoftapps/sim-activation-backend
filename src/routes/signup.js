@@ -47,9 +47,10 @@ const router = express.Router();
  *                 example: "+1234567890"
  *               activationData:
  *                 type: array
+ *                 description: Optional activation-related data
  *                 items:
  *                   type: object
- *                 description: Optional activation-related data
+ *                   properties: {}
  *     responses:
  *       201:
  *         description: User created successfully
@@ -85,6 +86,9 @@ const router = express.Router();
  *                     activationData:
  *                       type: array
  *                       description: Activation-related data
+ *                       items:
+ *                         type: object
+ *                         properties: {}
  *       400:
  *         description: Missing required fields
  *         content:
@@ -125,7 +129,6 @@ const router = express.Router();
  *                   type: string
  *                   example: Server error
  */
-
 router.post("/createUser", async (req, res) => {
   const { fullName, email, password, phone, activationData } = req.body;
 
@@ -136,7 +139,6 @@ router.post("/createUser", async (req, res) => {
   }
 
   try {
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({
@@ -145,24 +147,20 @@ router.post("/createUser", async (req, res) => {
       });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    const apiKey = await generateApiKey(); // Should return a unique string
+    const apiKey = await generateApiKey();
 
-    // Build new user
     const newUser = new User({
       fullName,
       email,
       password: hashedPassword,
       phone,
       apiKey,
-      activationData: Array.isArray(activationData) ? activationData : [], // Ensure array
+      activationData: Array.isArray(activationData) ? activationData : [],
     });
 
-    // Save to DB
     await newUser.save();
 
-    // Respond
     res.status(201).json({
       success: true,
       message: "User created successfully",
@@ -269,7 +267,6 @@ router.post("/createUser", async (req, res) => {
  *                   type: string
  *                   example: Server error
  */
-
 router.post("/createAdmin", async (req, res) => {
   const { fullName, email, password, phone } = req.body;
 
@@ -280,7 +277,6 @@ router.post("/createAdmin", async (req, res) => {
   }
 
   try {
-    // Check if email exists in User collection
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({
@@ -289,7 +285,6 @@ router.post("/createAdmin", async (req, res) => {
       });
     }
 
-    // Check if email exists in Admin collection
     const existingAdmin = await Admin.findOne({ email });
     if (existingAdmin) {
       return res.status(400).json({
