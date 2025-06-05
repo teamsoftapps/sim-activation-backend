@@ -90,6 +90,13 @@ import reactivateRoutes from "./src/routes/reactivate.js";
 import signinRoutes from "./src/routes/signin.js";
 import signupRoutes from "./src/routes/signup.js";
 import purchasePlan from "./src/routes/purchasePlan.js";
+import getSubscriberInquiry from "./src/routes/getSubscriberInquiry.js";
+import activeNewSubscriber from "./src/routes/activeNewSubscriber.js";
+import deactivateSubscriber from "./src/routes/deactivateSubscriber.js";
+import reactivateSubscriber from "./src/routes/reactivateSubscriber.js";
+import changePlan from "./src/routes/changePlan.js";
+import addWfc from "./src/routes/addWfc.js";
+import updateE911address from "./src/routes/updateE911address.js";
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use(express.json());
@@ -165,6 +172,13 @@ app.use("/change-sim-no", apiKeyMiddleware, changeSimRoutes);
 app.use("/deactivate", apiKeyMiddleware, deactivateRoutes);
 app.use("/reactivate", apiKeyMiddleware, reactivateRoutes);
 app.use("/purchasePlan", apiKeyMiddleware, purchasePlan);
+app.use("/at&t/get-subscriber-inquiry", apiKeyMiddleware, getSubscriberInquiry);
+app.use("/at&t/active-new-subscriber", apiKeyMiddleware, activeNewSubscriber);
+app.use("/at&t/deactivate-subscriber", apiKeyMiddleware, deactivateSubscriber);
+app.use("/at&t/reactivate-subscriber", apiKeyMiddleware, reactivateSubscriber);
+app.use("/at&t/change-plan", apiKeyMiddleware, changePlan);
+app.use("/add-wfc", apiKeyMiddleware, addWfc);
+app.use("/update-e911address", apiKeyMiddleware, updateE911address);
 
 app.use("/admin-user", adminUserControlRoutes);
 app.use("/auth", signinRoutes);
