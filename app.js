@@ -91,6 +91,16 @@ import signinRoutes from "./src/routes/signin.js";
 import signupRoutes from "./src/routes/signup.js";
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use(express.json());
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
+  })
+);
+app.options("*", cors());
 
 // Serve static Swagger UI files manually
 app.use(
@@ -137,16 +147,6 @@ app.get("/api-docs", (req, res) => {
 });
 
 // Middleware and other routes
-app.use(express.json());
-
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
-  })
-);
-app.options("*", cors());
 
 // MongoDB connection
 mongoose
