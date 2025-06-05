@@ -1,42 +1,86 @@
-/** @format */
+// /** @format */
 
+// import express from "express";
+// import mongoose from "mongoose";
+// import dotenv from "dotenv";
+// import cors from "cors";
+// import apiKeyMiddleware from "./src/middleware/apiKeyCheck.js";
+// import swaggerJsdoc from "swagger-jsdoc";
+// import swaggerUi from "swagger-ui-express";
+// import swaggerOptions from "./swaggerOptions.js";
+
+// dotenv.config();
+
+// const app = express();
+
+// const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// app.use(express.json());
+
+// // Enable CORS for all origins and handle preflight requests
+// app.use(
+//   cors({
+//     origin: "*",
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
+//   })
+// );
+// app.options("*", cors());
+
+// // Connect to MongoDB
+// mongoose
+//   .connect(process.env.MONGO_URI)
+//   .then(() => console.log("✅ Connected to MongoDB"))
+//   .catch((err) => {
+//     console.error("❌ Failed to connect to MongoDB:", err.message);
+//     process.exit(1);
+//   });
+
+// import activateRoutes from "./src/routes/activate.js";
+// import adminUserControlRoutes from "./src/routes/adminUserControlRoutes.js";
+// import bulkActivationRoutes from "./src/routes/bulkActivate.js";
+// import changeSimRoutes from "./src/routes/changeSim.js";
+// import deactivateRoutes from "./src/routes/deactivate.js";
+// import reactivateRoutes from "./src/routes/reactivate.js";
+// import signinRoutes from "./src/routes/signin.js";
+// import signupRoutes from "./src/routes/signup.js";
+
+// app.use("/activate", apiKeyMiddleware, activateRoutes);
+// app.use("/bulk-activate", apiKeyMiddleware, bulkActivationRoutes);
+// app.use("/change-sim-no", apiKeyMiddleware, changeSimRoutes);
+// app.use("/deactivate", apiKeyMiddleware, deactivateRoutes);
+// app.use("/reactivate", apiKeyMiddleware, reactivateRoutes);
+
+// app.use("/admin-user", adminUserControlRoutes);
+
+// app.use("/auth", signinRoutes);
+// app.use("/auth/signup", signupRoutes);
+
+// // Start server
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+/** @format */
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import apiKeyMiddleware from "./src/middleware/apiKeyCheck.js";
 import swaggerJsdoc from "swagger-jsdoc";
-import swaggerUi from "swagger-ui-express";
 import swaggerOptions from "./swaggerOptions.js";
 
 dotenv.config();
 
 const app = express();
 
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
+// For __dirname in ES module scope
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-app.use(express.json());
-
-// Enable CORS for all origins and handle preflight requests
-app.use(
-  cors({
-    origin: "*",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
-  })
-);
-app.options("*", cors());
-
-// Connect to MongoDB
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Connected to MongoDB"))
-  .catch((err) => {
-    console.error("❌ Failed to connect to MongoDB:", err.message);
-    process.exit(1);
-  });
-
+// Swagger setup
 import activateRoutes from "./src/routes/activate.js";
 import adminUserControlRoutes from "./src/routes/adminUserControlRoutes.js";
 import bulkActivationRoutes from "./src/routes/bulkActivate.js";
@@ -46,6 +90,74 @@ import reactivateRoutes from "./src/routes/reactivate.js";
 import signinRoutes from "./src/routes/signin.js";
 import signupRoutes from "./src/routes/signup.js";
 
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+// Serve static Swagger UI files manually
+app.use(
+  "/swagger-ui",
+  express.static(path.join(__dirname, "node_modules", "swagger-ui-dist"))
+);
+
+// Serve Swagger JSON
+app.get("/swagger.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
+// Serve custom Swagger HTML
+app.get("/api-docs", (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>API Docs</title>
+        <link rel="stylesheet" type="text/css" href="/swagger-ui/swagger-ui.css" />
+      </head>
+      <body>
+        <div id="swagger-ui"></div>
+        <script src="/swagger-ui/swagger-ui-bundle.js"></script>
+        <script src="/swagger-ui/swagger-ui-standalone-preset.js"></script>
+        <script>
+          window.onload = () => {
+            SwaggerUIBundle({
+              url: '/swagger.json',
+              dom_id: '#swagger-ui',
+              presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+              ],
+              layout: "StandaloneLayout"
+            });
+          };
+        </script>
+      </body>
+    </html>
+  `);
+});
+
+// Middleware and other routes
+app.use(express.json());
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "x-api-key", "Authorization"],
+  })
+);
+app.options("*", cors());
+
+// MongoDB connection
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connected to MongoDB"))
+  .catch((err) => {
+    console.error("❌ Failed to connect to MongoDB:", err.message);
+    process.exit(1);
+  });
+
+// Routes
 app.use("/activate", apiKeyMiddleware, activateRoutes);
 app.use("/bulk-activate", apiKeyMiddleware, bulkActivationRoutes);
 app.use("/change-sim-no", apiKeyMiddleware, changeSimRoutes);
@@ -53,10 +165,9 @@ app.use("/deactivate", apiKeyMiddleware, deactivateRoutes);
 app.use("/reactivate", apiKeyMiddleware, reactivateRoutes);
 
 app.use("/admin-user", adminUserControlRoutes);
-
 app.use("/auth", signinRoutes);
 app.use("/auth/signup", signupRoutes);
 
-// Start server
+// Server start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
