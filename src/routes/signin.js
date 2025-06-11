@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt"; // ✅ Import bcrypt
 import Admin from "../models/Admin.js";
 import User from "../models/User.js";
+import Settings from "../models/Settings.js";
 
 const router = express.Router();
 
@@ -124,7 +125,8 @@ router.post("/signin", async (req, res) => {
 
       account.token = token;
       await account.save();
-
+      const settings = await Settings.findOne();
+      const activationCost = settings?.activationCost ?? null;
       return res.json({
         success: true,
         message: "Admin signed in successfully",
@@ -134,6 +136,7 @@ router.post("/signin", async (req, res) => {
           id: account._id,
           fullName: account.fullName,
           email: account.email,
+          activationCost,
         },
       });
     }
