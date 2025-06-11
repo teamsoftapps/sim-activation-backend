@@ -172,6 +172,7 @@ router.post("/signin", async (req, res) => {
         id: account._id,
         fullName: account.fullName,
         email: account.email,
+        credits: account.credits,
       },
     });
   } catch (err) {
