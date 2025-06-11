@@ -36,7 +36,7 @@ import reactivateSubscriber from "./src/routes/reactivateSubscriber.js";
 import changePlan from "./src/routes/changePlan.js";
 import addWfc from "./src/routes/addWfc.js";
 import updateE911address from "./src/routes/updateE911address.js";
-
+import userRoutes from "./src/routes/userRoutes.js";
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use(express.json());
 
@@ -126,7 +126,7 @@ app.use("/update-e911address", apiKeyMiddleware, updateE911address);
 app.use("/admin-user", adminUserControlRoutes);
 app.use("/auth", signinRoutes);
 app.use("/auth/signup", signupRoutes);
-
+app.use("/user", userRoutes);
 // Server start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
