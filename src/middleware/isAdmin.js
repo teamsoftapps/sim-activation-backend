@@ -3,7 +3,6 @@ import Admin from "../models/Admin.js";
 
 const isAdmin = async (req, res, next) => {
   try {
-    // Get token from Authorization header: "Bearer <token>"
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
@@ -13,10 +12,8 @@ const isAdmin = async (req, res, next) => {
       });
     }
 
-    // ✅ Decode token using JWT secret
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // ✅ Find admin using the ID from the token payload
     const admin = await Admin.findById(decoded.id);
 
     if (!admin) {
@@ -26,7 +23,6 @@ const isAdmin = async (req, res, next) => {
       });
     }
 
-    // Attach admin info to the request (optional)
     req.admin = admin;
     next();
   } catch (err) {
