@@ -5,7 +5,6 @@ import axios from "axios";
 import User from "../models/User.js";
 const router = express.Router();
 import dotenv from "dotenv";
-import Settings from "../models/Settings.js";
 dotenv.config();
 
 /**
@@ -135,24 +134,19 @@ router.post("/save-activation", async (req, res) => {
   }
 
   try {
-    const settings = await Settings.findOne();
-    if (!settings) {
-      return res
-        .status(500)
-        .json({ error: "Activation cost not set by admin" });
-    }
-
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    if (user.credits < settings.activationCost) {
+    const activationCost = user.activationCost ?? 0;
+
+    if (user.credits < activationCost) {
       return res.status(400).json({ error: "Insufficient credits" });
     }
 
     // Deduct credits
-    user.credits -= settings.activationCost;
+    user.credits -= activationCost;
 
     // Add activation data
     user.activationData.push({

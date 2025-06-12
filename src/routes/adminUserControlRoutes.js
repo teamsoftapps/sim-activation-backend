@@ -5,7 +5,6 @@ import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import isAdmin from "../middleware/isAdmin.js";
 import bcrypt from "bcrypt";
-import Settings from "../models/Settings.js";
 
 const router = express.Router();
 
@@ -269,6 +268,9 @@ router.delete("/users/:id", isAdmin, async (req, res) => {
  *                 message:
  *                   type: string
  *                   example: Activation cost updated
+ *                 email:
+ *                   type: string
+ *                   example: john@example.com
  *                 activationCost:
  *                   type: number
  *                   example: 10
@@ -279,25 +281,30 @@ router.delete("/users/:id", isAdmin, async (req, res) => {
  */
 
 router.post("/set-activation-cost", async (req, res) => {
-  const { activationCost } = req.body;
+  const { email, activationCost } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
 
   if (typeof activationCost !== "number" || activationCost < 0) {
     return res.status(400).json({ error: "Invalid activation cost" });
   }
 
   try {
-    let settings = await Settings.findOne();
-    if (!settings) {
-      settings = new Settings({ activationCost });
-    } else {
-      settings.activationCost = activationCost;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    await settings.save();
+    user.activationCost = activationCost;
 
-    res.json({ message: "Activation cost updated", activationCost });
+    await user.save();
+
+    res.json({ message: "Activation cost updated for user", activationCost });
   } catch (err) {
-    console.error("Error updating activation cost:", err);
+    console.error("Error updating user activation cost:", err);
     res.status(500).json({ error: err.message || "Unknown error" });
   }
 });

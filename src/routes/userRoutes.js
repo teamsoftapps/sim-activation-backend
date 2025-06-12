@@ -1,6 +1,5 @@
 import express from "express";
 import User from "../models/User.js";
-import Settings from "../models/Settings.js";
 
 const router = express.Router();
 
@@ -16,13 +15,12 @@ router.get("/current", async (req, res) => {
 
   try {
     const user = await User.findOne({ email }).lean();
+
     if (!user) {
       return res
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-
-    const settings = await Settings.findOne().lean();
 
     return res.status(200).json({
       success: true,
@@ -30,8 +28,8 @@ router.get("/current", async (req, res) => {
         email: user.email,
         fullName: user.fullName,
         credits: user.credits,
+        activationCost: user.activationCost ?? 0,
       },
-      activationCost: settings?.activationCost ?? 0,
     });
   } catch (err) {
     console.error("❌ Error fetching current user:", err);

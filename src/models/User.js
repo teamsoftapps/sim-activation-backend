@@ -36,7 +36,7 @@ const Users = new mongoose.Schema({
     type: String,
     required: true,
   },
-  // In Users schema:
+
   credits: {
     type: Number,
     default: 0,
@@ -45,7 +45,11 @@ const Users = new mongoose.Schema({
   apiKey: String,
   token: String,
 
-  // New: Activation data field
+  activationCost: {
+    type: Number,
+    default: 0,
+  },
+
   activationData: [
     {
       esn: String,
