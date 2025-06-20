@@ -118,8 +118,8 @@ router.post("/signin", async (req, res) => {
 
       const token = jwt.sign(
         { id: account._id, role: "admin" },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
+        process.env.JWT_SECRET
+        // { expiresIn: "1d" }
       );
 
       account.token = token;
@@ -156,8 +156,8 @@ router.post("/signin", async (req, res) => {
 
     const token = jwt.sign(
       { id: account._id, role: "user" },
-      process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      process.env.JWT_SECRET
+      // { expiresIn: "1d" }
     );
 
     account.token = token;
