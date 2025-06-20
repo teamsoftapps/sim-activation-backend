@@ -124,6 +124,58 @@ router.post("/", async (req, res) => {
  *       500:
  *         description: Internal server error
  */
+// router.post("/save-activation", async (req, res) => {
+//   console.log("Save Activation Request:", req.body);
+
+//   const { email, ...activationData } = req.body;
+
+//   if (!email) {
+//     return res.status(400).json({ error: "Email is required" });
+//   }
+
+//   try {
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     const activationCost = user.activationCost ?? 0;
+
+//     if (user.credits < activationCost) {
+//       return res.status(400).json({ error: "Insufficient credits" });
+//     }
+
+//     // Deduct credits
+//     user.credits -= activationCost;
+
+//     // Add activation data
+//     user.activationData.push({
+//       esn: activationData.esn,
+//       planId: activationData.planId,
+//       language: activationData.language,
+//       zip: activationData.zip,
+//       BillingCode: activationData.BillingCode,
+//       E911ADDRESS: {
+//         STREET1: activationData.E911ADDRESS?.STREET1,
+//         STREET2: activationData.E911ADDRESS?.STREET2,
+//         CITY: activationData.E911ADDRESS?.CITY,
+//         STATE: activationData.E911ADDRESS?.STATE,
+//         ZIP: activationData.E911ADDRESS?.ZIP,
+//       },
+//     });
+
+//     await user.save();
+
+//     res.json({
+//       message: "Activation saved. Credits deducted.",
+//       activationData: user.activationData,
+//       remainingCredits: user.credits,
+//     });
+//   } catch (err) {
+//     console.error("Error saving activation:", err);
+//     res.status(500).json({ error: err.message || "Unknown error" });
+//   }
+// });
 router.post("/save-activation", async (req, res) => {
   console.log("Save Activation Request:", req.body);
 
@@ -148,13 +200,14 @@ router.post("/save-activation", async (req, res) => {
     // Deduct credits
     user.credits -= activationCost;
 
-    // Add activation data
+    // Add activation data with activationDate
     user.activationData.push({
       esn: activationData.esn,
       planId: activationData.planId,
       language: activationData.language,
       zip: activationData.zip,
       BillingCode: activationData.BillingCode,
+      activationDate: new Date(),
       E911ADDRESS: {
         STREET1: activationData.E911ADDRESS?.STREET1,
         STREET2: activationData.E911ADDRESS?.STREET2,
@@ -176,53 +229,5 @@ router.post("/save-activation", async (req, res) => {
     res.status(500).json({ error: err.message || "Unknown error" });
   }
 });
-// router.post("/save-activation", async (req, res) => {
-//   console.log("Save Activation Request:", req.body);
-
-//   const { email, ...activationData } = req.body;
-
-//   if (!email) {
-//     return res
-//       .status(400)
-//       .json({ error: "Email is required to save activation data" });
-//   }
-
-//   try {
-//     const updatedUser = await User.findOneAndUpdate(
-//       { email },
-//       {
-//         $push: {
-//           activationData: {
-//             esn: activationData.esn,
-//             planId: activationData.planId,
-//             language: activationData.language,
-//             zip: activationData.zip,
-//             BillingCode: activationData.BillingCode,
-//             E911ADDRESS: {
-//               STREET1: activationData.E911ADDRESS?.STREET1,
-//               STREET2: activationData.E911ADDRESS?.STREET2,
-//               CITY: activationData.E911ADDRESS?.CITY,
-//               STATE: activationData.E911ADDRESS?.STATE,
-//               ZIP: activationData.E911ADDRESS?.ZIP,
-//             },
-//           },
-//         },
-//       },
-//       { new: true }
-//     );
-
-//     if (!updatedUser) {
-//       return res.status(404).json({ error: "User not found with this email" });
-//     }
-
-//     res.json({
-//       message: "Activation data saved successfully",
-//       activationData: updatedUser.activationData,
-//     });
-//   } catch (err) {
-//     console.error("DB Save error:", err);
-//     res.status(500).json({ error: err.message || "Unknown error" });
-//   }
-// });
 
 export default router;

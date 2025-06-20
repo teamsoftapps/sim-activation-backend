@@ -57,6 +57,7 @@ const Users = new mongoose.Schema({
       language: String,
       zip: String,
       BillingCode: String,
+      activationDate: { type: Date, default: Date.now },
       E911ADDRESS: {
         STREET1: String,
         STREET2: String,
