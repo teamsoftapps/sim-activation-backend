@@ -44,18 +44,41 @@ const router = express.Router();
  */
 router.post("/", async (req, res) => {
   try {
+    // Extract x-api-key from request header
+    const apiKey = req.headers["x-api-key"];
+
+    if (!apiKey) {
+      return res.status(400).json({ error: "Missing x-api-key in headers" });
+    }
+
+    // Find user by apiKey
+    const user = await User.findOne({ apiKey });
+
+    // Default bearer token
+    let bearerToken = process.env.BEARER_TOKEN;
+
+    // If user is Carlos, use Carlos bearer token
+    if (user && user.email === "c.fonte@prepaidiq.com") {
+      bearerToken = process.env.CARLOS_BEARER_TOKEN;
+      console.log("Using Carlos Bearer Token");
+    } else {
+      console.log("Using Default Bearer Token");
+    }
+
     const response = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/deactivate-sim-card",
       req.body,
       {
         headers: {
-          Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          Authorization: `Bearer ${bearerToken}`,
           "Content-Type": "application/json",
         },
       }
     );
+
     res.json(response.data);
   } catch (err) {
+    console.error("Deactivate SIM Card Error:", err);
     res
       .status(err.response?.status || 500)
       .json(err.response?.data || { error: "Unknown error" });

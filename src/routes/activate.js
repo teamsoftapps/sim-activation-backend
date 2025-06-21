@@ -50,21 +50,60 @@ dotenv.config();
  *       500:
  *         description: Internal server error
  */
+// router.post("/", async (req, res) => {
+//   console.log("request:", req.body);
+//   try {
+//     const response = await axios.post(
+//       "https://api.opncomm.com/opencom/api/v1/active",
+//       req.body,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+//     res.json(response.data);
+//   } catch (err) {
+//     res
+//       .status(err.response?.status || 500)
+//       .json(err.response?.data || { error: "Unknown error" });
+//   }
+// });
+
 router.post("/", async (req, res) => {
   console.log("request:", req.body);
   try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    let bearerToken = process.env.BEARER_TOKEN;
+
+    if (
+      user &&
+      (user.email === "c.fonte@prepaidiq.com" || user.fullName === "Carlos")
+    ) {
+      bearerToken = process.env.CARLOS_BEARER_TOKEN;
+      console.log("Using Carlos Bearer Token");
+    } else {
+      console.log("Using Default Bearer Token");
+    }
+
     const response = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/active",
       req.body,
       {
         headers: {
-          Authorization: `Bearer ${process.env.BEARER_TOKEN}`,
+          Authorization: `Bearer ${bearerToken}`,
           "Content-Type": "application/json",
         },
       }
     );
+
     res.json(response.data);
   } catch (err) {
+    console.error("Activation Error:", err);
     res
       .status(err.response?.status || 500)
       .json(err.response?.data || { error: "Unknown error" });
