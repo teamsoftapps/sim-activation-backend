@@ -149,45 +149,116 @@ router.post("/", async (req, res) => {
  *       500:
  *         description: Server/database error
  */
-router.post("/save-reactivation", async (req, res) => {
-  console.log("Save Reactivation Request:", req.body);
+// router.post("/save-reactivation", async (req, res) => {
+//   console.log("Save Reactivation Request:", req.body);
 
-  const { email, ...reactivationData } = req.body;
+//   const { email, ...reactivationData } = req.body;
 
-  if (!email) {
-    return res
-      .status(400)
-      .json({ error: "Email is required to save reactivation data" });
-  }
+//   if (!email) {
+//     return res
+//       .status(400)
+//       .json({ error: "Email is required to save reactivation data" });
+//   }
 
+//   try {
+//     const updatedUser = await User.findOneAndUpdate(
+//       { email },
+//       {
+//         $push: {
+//           reactivation: {
+//             esn: reactivationData.esn,
+//             mdn: reactivationData.mdn,
+//             plan: reactivationData.plan,
+//             zip: reactivationData.zip,
+//             BillingCode: reactivationData.BillingCode,
+//           },
+//         },
+//       },
+//       { new: true }
+//     );
+
+//     if (!updatedUser) {
+//       return res.status(404).json({ error: "User not found with this email" });
+//     }
+
+//     res.json({
+//       message: "Reactivation data saved successfully",
+//       reactivationData: updatedUser.reactivation,
+//     });
+//   } catch (err) {
+//     console.error("DB Save error:", err);
+//     res.status(500).json({ error: err.message || "Unknown error" });
+//   }
+// });
+
+router.post("/", async (req, res) => {
   try {
-    const updatedUser = await User.findOneAndUpdate(
-      { email },
+    // Get x-api-key from request header
+    const apiKey = req.headers["x-api-key"];
+
+    if (!apiKey) {
+      return res.status(400).json({ error: "Missing x-api-key in headers" });
+    }
+
+    // Find user by apiKey
+    const user = await User.findOne({ apiKey });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ error: "User not found with this API key" });
+    }
+
+    const bearerToken = user.opncommToken;
+
+    if (!bearerToken) {
+      return res.status(400).json({ error: "Missing opncommToken for user" });
+    }
+
+    console.log("Making re-activate request with token:", bearerToken);
+
+    // Call external Reactivation API
+    const reactivationResponse = await axios.post(
+      "https://api.opncomm.com/opencom/api/v1/reactivate-sim-card",
+      req.body,
+      {
+        headers: {
+          Authorization: `Bearer ${bearerToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    // Extract reactivation data from request body
+    const { esn, mdn, plan, zip, BillingCode } = req.body;
+
+    // Save reactivation data directly in DB
+    await User.findOneAndUpdate(
+      { email: user.email },
       {
         $push: {
           reactivation: {
-            esn: reactivationData.esn,
-            mdn: reactivationData.mdn,
-            plan: reactivationData.plan,
-            zip: reactivationData.zip,
-            BillingCode: reactivationData.BillingCode,
+            esn: esn || "",
+            mdn: mdn || "",
+            plan: plan || "",
+            zip: zip || "",
+            BillingCode: BillingCode || "",
           },
         },
       },
       { new: true }
     );
 
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found with this email" });
-    }
-
+    // Respond with the reactivation API response
     res.json({
-      message: "Reactivation data saved successfully",
-      reactivationData: updatedUser.reactivation,
+      message: "SIM reactivated and reactivation data saved successfully",
+      reactivationResult: reactivationResponse.data,
     });
   } catch (err) {
-    console.error("DB Save error:", err);
-    res.status(500).json({ error: err.message || "Unknown error" });
+    console.error("Reactivate SIM Card Error:", err.message);
+    res
+      .status(err.response?.status || 500)
+      .json(err.response?.data || { error: "Unknown error" });
   }
 });
 
