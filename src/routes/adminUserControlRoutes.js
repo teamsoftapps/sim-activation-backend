@@ -159,12 +159,14 @@ router.get("/users/:id", isAdmin, async (req, res) => {
 // });
 router.put("/users/:id", isAdmin, async (req, res) => {
   try {
-    const { fullName, email, phone, newPassword, credits } = req.body;
+    const { fullName, email, phone, newPassword, credits, opncommToken } =
+      req.body;
 
     const updateFields = {};
     if (fullName) updateFields.fullName = fullName;
     if (email) updateFields.email = email;
     if (phone) updateFields.phone = phone;
+    if (opncommToken) updateFields.opncommToken = opncommToken;
 
     if (typeof credits === "number" && credits >= 0) {
       updateFields.credits = credits;
