@@ -80,13 +80,11 @@ router.post("/", async (req, res) => {
     // let bearerToken = process.env.BEARER_TOKEN;
     let bearerToken = user.opncommToken;
 
-    // If user is Carlos, use Carlos bearer token
-    // if (user && user.email === "c.fonte@prepaidiq.com") {
-    //   bearerToken = process.env.CARLOS_BEARER_TOKEN;
-    //   console.log("Using Carlos Bearer Token");
-    // } else {
-    //   console.log("Using Default Bearer Token");
-    // }
+    if (!bearerToken) {
+      return res.status(400).json({ error: "Missing opncommToken for user" });
+    }
+
+    console.log("Making purchase plan request with token:", bearerToken);
 
     const response = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/purchase-plan",

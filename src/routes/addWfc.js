@@ -79,13 +79,11 @@ router.post("/", async (req, res) => {
     // Default bearer token
     let bearerToken = user.opncommToken;
 
-    // If user is Carlos, switch bearer token
-    // if (user && user.email === "c.fonte@prepaidiq.com") {
-    //   bearerToken = process.env.CARLOS_BEARER_TOKEN;
-    //   console.log("Using Carlos Bearer Token");
-    // } else {
-    //   console.log("Using Default Bearer Token");
-    // }
+    if (!bearerToken) {
+      return res.status(400).json({ error: "Missing opncommToken for user" });
+    }
+
+    console.log("Making ADD WFC request with token:", bearerToken);
 
     // Make external request
     const response = await axios.post(

@@ -80,13 +80,11 @@ router.post("/", upload.any(), async (req, res) => {
     // Default bearer token
     let bearerToken = user.opncommToken;
 
-    // If user is Carlos, switch bearer token
-    // if (user && user.email === "c.fonte@prepaidiq.com") {
-    //   bearerToken = process.env.CARLOS_BEARER_TOKEN;
-    //   console.log("Using Carlos Bearer Token");
-    // } else {
-    //   console.log("Using Default Bearer Token");
-    // }
+    if (!bearerToken) {
+      return res.status(400).json({ error: "Missing opncommToken for user" });
+    }
+
+    console.log("Making BULK activation request with token:", bearerToken);
 
     // Prepare form data correctly for multipart request
     const formData = req.body; // This will work only if your axios instance supports multipart form automatically.
