@@ -85,6 +85,7 @@ router.post("/", async (req, res) => {
       (user.email === "c.fonte@prepaidiq.com" || user.fullName === "Carlos")
     ) {
       bearerToken = process.env.CARLOS_BEARER_TOKEN;
+
       console.log("Using Carlos Bearer Token");
     } else {
       console.log("Using Default Bearer Token");
