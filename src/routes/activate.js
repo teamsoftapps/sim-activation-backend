@@ -78,17 +78,19 @@ router.post("/", async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    let bearerToken = process.env.BEARER_TOKEN;
+    let bearerToken = user.opncommToken;
 
-    if (
-      user &&
-      (user.email === "c.fonte@prepaidiq.com" || user.fullName === "Carlos")
-    ) {
-      bearerToken = process.env.CARLOS_BEARER_TOKEN;
-      console.log("Using Carlos Bearer Token");
-    } else {
-      console.log("Using Default Bearer Token");
-    }
+    console.log("bearerToken");
+
+    // if (
+    //   user &&
+    //   (user.email === "c.fonte@prepaidiq.com" || user.fullName === "Carlos")
+    // ) {
+    //   bearerToken = process.env.CARLOS_BEARER_TOKEN;
+    //   console.log("Using Carlos Bearer Token");
+    // } else {
+    //   console.log("Using Default Bearer Token");
+    // }
 
     const response = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/active",

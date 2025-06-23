@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const E911AddressSchema = new mongoose.Schema({
   STREET1: String,
@@ -44,6 +45,11 @@ const Users = new mongoose.Schema({
 
   apiKey: String,
   token: String,
+  opncommToken: {
+    type: String,
+    default:
+      "opencom_skdaf6d495-c91b-40ae-861e-0b24e5e826a2-ee526093-4713-43b9-a887-b96fc9a7c631",
+  },
 
   activationCost: {
     type: Number,
