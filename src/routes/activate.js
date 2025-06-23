@@ -71,26 +71,54 @@ dotenv.config();
 //   }
 // });
 
+// router.post("/", async (req, res) => {
+//   console.log("request:", req.body);
+//   try {
+//     const { email, opncommToken } = req.body;
+
+//     const user = await User.findOne({ email });
+
+//     let bearerToken = user.opncommToken;
+
+//     console.log("bearerToken");
+
+//     const response = await axios.post(
+//       "https://api.opncomm.com/opencom/api/v1/active",
+//       req.body,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${bearerToken}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     res.json(response.data);
+//   } catch (err) {
+//     console.error("Activation Error:", err);
+//     res
+//       .status(err.response?.status || 500)
+//       .json(err.response?.data || { error: "Unknown error" });
+//   }
+// });
+
 router.post("/", async (req, res) => {
-  console.log("request:", req.body);
   try {
     const { email } = req.body;
+    console.log("Incoming request body:", req.body);
 
+    // Fetch user from DB
     const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-    let bearerToken = user.opncommToken;
+    const bearerToken = user.opncommToken;
+    if (!bearerToken) {
+      return res.status(400).json({ error: "Token not found for user" });
+    }
 
-    console.log("bearerToken");
-
-    // if (
-    //   user &&
-    //   (user.email === "c.fonte@prepaidiq.com" || user.fullName === "Carlos")
-    // ) {
-    //   bearerToken = process.env.CARLOS_BEARER_TOKEN;
-    //   console.log("Using Carlos Bearer Token");
-    // } else {
-    //   console.log("Using Default Bearer Token");
-    // }
+    console.log("Using bearerToken:", bearerToken);
 
     const response = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/active",
@@ -105,10 +133,10 @@ router.post("/", async (req, res) => {
 
     res.json(response.data);
   } catch (err) {
-    console.error("Activation Error:", err);
+    console.error("Activation Error:", err?.response?.data || err.message);
     res
-      .status(err.response?.status || 500)
-      .json(err.response?.data || { error: "Unknown error" });
+      .status(err?.response?.status || 500)
+      .json(err?.response?.data || { error: "Unknown server error" });
   }
 });
 
