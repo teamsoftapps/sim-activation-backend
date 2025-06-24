@@ -358,24 +358,101 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
+// router.post("/", async (req, res) => {
+//   try {
+//     const { email, ...activationData } = req.body;
+//     console.log("Incoming request body:", req.body);
+
+//     if (!email) {
+//       return res.status(400).json({ error: "Email is required" });
+//     }
+
+//     // Fetch user from DB
+//     const user = await User.findOne({ email });
+//     if (!user) {
+//       return res.status(404).json({ error: "User not found" });
+//     }
+
+//     const bearerToken = user.opncommToken;
+//     if (!bearerToken) {
+//       return res.status(400).json({ error: "Token not found for user" });
+//     }
+
+//     const activationCost = user.activationCost ?? 0;
+//     if (user.credits < activationCost) {
+//       return res.status(400).json({ error: "Insufficient credits" });
+//     }
+
+//     console.log("Calling external activation API with token:", bearerToken);
+
+//     // Call external activation API
+//     const activationResponse = await axios.post(
+//       "https://api.opncomm.com/opencom/api/v1/active",
+//       req.body,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${bearerToken}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     // Deduct credits
+//     user.credits -= activationCost;
+
+//     // Save activation data
+//     user.activationData.push({
+//       esn: activationData.esn,
+//       planId: activationData.planId,
+//       language: activationData.language,
+//       zip: activationData.zip,
+//       BillingCode: activationData.BillingCode,
+//       activationDate: new Date(),
+//       E911ADDRESS: {
+//         STREET1: activationData.E911ADDRESS?.STREET1,
+//         STREET2: activationData.E911ADDRESS?.STREET2,
+//         CITY: activationData.E911ADDRESS?.CITY,
+//         STATE: activationData.E911ADDRESS?.STATE,
+//         ZIP: activationData.E911ADDRESS?.ZIP,
+//       },
+//     });
+
+//     await user.save();
+
+//     // Final response
+//     res.json({
+//       message: "Device activated and data saved. Credits deducted.",
+//       activationAPIResponse: activationResponse.data,
+//       activationData: user.activationData,
+//       remainingCredits: user.credits,
+//     });
+//   } catch (err) {
+//     console.error("Activation Error:", err?.response?.data || err.message);
+//     res
+//       .status(err?.response?.status || 500)
+//       .json(err?.response?.data || { error: "Unknown server error" });
+//   }
+// });
+
 router.post("/", async (req, res) => {
   try {
-    const { email, ...activationData } = req.body;
-    console.log("Incoming request body:", req.body);
+    const apiKey = req.headers["x-api-key"];
 
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
+    if (!apiKey) {
+      return res.status(400).json({ error: "Missing x-api-key in headers" });
     }
 
     // Fetch user from DB
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ apiKey });
     if (!user) {
-      return res.status(404).json({ error: "User not found" });
+      return res
+        .status(404)
+        .json({ error: "User not found with this API key" });
     }
 
     const bearerToken = user.opncommToken;
     if (!bearerToken) {
-      return res.status(400).json({ error: "Token not found for user" });
+      return res.status(400).json({ error: "Missing opncommToken for user" });
     }
 
     const activationCost = user.activationCost ?? 0;
@@ -400,26 +477,35 @@ router.post("/", async (req, res) => {
     // Deduct credits
     user.credits -= activationCost;
 
+    // Extract activation fields
+    const {
+      esn,
+      planId,
+      language,
+      zip,
+      BillingCode,
+      E911ADDRESS = {},
+    } = req.body;
+
     // Save activation data
     user.activationData.push({
-      esn: activationData.esn,
-      planId: activationData.planId,
-      language: activationData.language,
-      zip: activationData.zip,
-      BillingCode: activationData.BillingCode,
+      esn: esn || "",
+      planId: planId || "",
+      language: language || "",
+      zip: zip || "",
+      BillingCode: BillingCode || "",
       activationDate: new Date(),
       E911ADDRESS: {
-        STREET1: activationData.E911ADDRESS?.STREET1,
-        STREET2: activationData.E911ADDRESS?.STREET2,
-        CITY: activationData.E911ADDRESS?.CITY,
-        STATE: activationData.E911ADDRESS?.STATE,
-        ZIP: activationData.E911ADDRESS?.ZIP,
+        STREET1: E911ADDRESS.STREET1 || "",
+        STREET2: E911ADDRESS.STREET2 || "",
+        CITY: E911ADDRESS.CITY || "",
+        STATE: E911ADDRESS.STATE || "",
+        ZIP: E911ADDRESS.ZIP || "",
       },
     });
 
     await user.save();
 
-    // Final response
     res.json({
       message: "Device activated and data saved. Credits deducted.",
       activationAPIResponse: activationResponse.data,
