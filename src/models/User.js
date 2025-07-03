@@ -63,7 +63,14 @@ const Users = new mongoose.Schema({
       language: String,
       zip: String,
       BillingCode: String,
+      mdn: String,
       activationDate: { type: Date, default: Date.now },
+      endDateOfActivation: {
+        type: Date,
+        default: function () {
+          return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+        },
+      },
       E911ADDRESS: {
         STREET1: String,
         STREET2: String,

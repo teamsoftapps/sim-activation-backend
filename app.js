@@ -9,6 +9,9 @@ import { fileURLToPath } from "url";
 import apiKeyMiddleware from "./src/middleware/apiKeyCheck.js";
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerOptions from "./swaggerOptions.js";
+import "./cron/deactivateExpiredActivations.js";
+import getActivations from "./src/routes/getActivations.js";
+import updateActivations from "./src/routes/updateActivation.js";
 
 dotenv.config();
 
@@ -127,6 +130,11 @@ app.use("/admin-user", adminUserControlRoutes);
 app.use("/auth", signinRoutes);
 app.use("/auth/signup", signupRoutes);
 app.use("/user", userRoutes);
+
+//Get Activations
+app.use("/get-activations", getActivations);
+app.use("/admin-user", updateActivations);
+
 // Server start
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

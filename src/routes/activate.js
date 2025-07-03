@@ -486,7 +486,7 @@ router.post("/", async (req, res) => {
       BillingCode,
       E911ADDRESS = {},
     } = req.body;
-
+    const mdn = activationResponse?.data?.data?.mdn || "";
     // Save activation data
     user.activationData.push({
       esn: esn || "",
@@ -494,7 +494,10 @@ router.post("/", async (req, res) => {
       language: language || "",
       zip: zip || "",
       BillingCode: BillingCode || "",
+      mdn, // ✅ Add mdn here
       activationDate: new Date(),
+      endDateOfActivation: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+
       E911ADDRESS: {
         STREET1: E911ADDRESS.STREET1 || "",
         STREET2: E911ADDRESS.STREET2 || "",
