@@ -434,6 +434,95 @@ const router = express.Router();
 //   }
 // });
 
+// router.post("/", async (req, res) => {
+//   try {
+//     const apiKey = req.headers["x-api-key"];
+
+//     if (!apiKey) {
+//       return res.status(400).json({ error: "Missing x-api-key in headers" });
+//     }
+
+//     // Fetch user from DB
+//     const user = await User.findOne({ apiKey });
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ error: "User not found with this API key" });
+//     }
+
+//     const bearerToken = user.opncommToken;
+//     if (!bearerToken) {
+//       return res.status(400).json({ error: "Missing opncommToken for user" });
+//     }
+
+//     const activationCost = user.activationCost ?? 0;
+//     if (user.credits < activationCost) {
+//       return res.status(400).json({ error: "Insufficient credits" });
+//     }
+
+//     console.log("Calling external activation API with token:", bearerToken);
+
+//     // Call external activation API
+//     const activationResponse = await axios.post(
+//       "https://api.opncomm.com/opencom/api/v1/active",
+//       req.body,
+//       {
+//         headers: {
+//           Authorization: `Bearer ${bearerToken}`,
+//           "Content-Type": "application/json",
+//         },
+//       }
+//     );
+
+//     // Deduct credits
+//     user.credits -= activationCost;
+
+//     // Extract activation fields
+//     const {
+//       esn,
+//       planId,
+//       language,
+//       zip,
+//       BillingCode,
+//       E911ADDRESS = {},
+//     } = req.body;
+//     const mdn = activationResponse?.data?.data?.mdn || "";
+//     // Save activation data
+//     user.activationData.push({
+//       esn: esn || "",
+//       planId: planId || "",
+//       language: language || "",
+//       zip: zip || "",
+//       BillingCode: BillingCode || "",
+//       mdn, // ✅ Add mdn here
+//       activationDate: new Date(),
+//       endDateOfActivation: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+
+//       E911ADDRESS: {
+//         STREET1: E911ADDRESS.STREET1 || "",
+//         STREET2: E911ADDRESS.STREET2 || "",
+//         CITY: E911ADDRESS.CITY || "",
+//         STATE: E911ADDRESS.STATE || "",
+//         ZIP: E911ADDRESS.ZIP || "",
+//       },
+//     });
+
+//     await user.save();
+
+//     res.json({
+//       message: "Device activated and data saved. Credits deducted.",
+//       activationAPIResponse: activationResponse.data,
+//       activationData: user.activationData,
+//       remainingCredits: user.credits,
+//     });
+//   } catch (err) {
+//     console.error("Activation Error:", err?.response?.data || err.message);
+//     res
+//       .status(err?.response?.status || 500)
+//       .json(err?.response?.data || { error: "Unknown server error" });
+//   }
+// });
+
 router.post("/", async (req, res) => {
   try {
     const apiKey = req.headers["x-api-key"];
@@ -486,7 +575,20 @@ router.post("/", async (req, res) => {
       BillingCode,
       E911ADDRESS = {},
     } = req.body;
+
     const mdn = activationResponse?.data?.data?.mdn || "";
+
+    // Calculate endDateOfActivation based on planId
+    let endDateOfActivation = new Date();
+    if (planId === "Plan01") {
+      endDateOfActivation.setDate(endDateOfActivation.getDate() + 30);
+    } else if (planId === "Plan012") {
+      endDateOfActivation.setFullYear(endDateOfActivation.getFullYear() + 1);
+    } else {
+      // default to 30 days if unknown planId
+      endDateOfActivation.setDate(endDateOfActivation.getDate() + 30);
+    }
+
     // Save activation data
     user.activationData.push({
       esn: esn || "",
@@ -494,10 +596,9 @@ router.post("/", async (req, res) => {
       language: language || "",
       zip: zip || "",
       BillingCode: BillingCode || "",
-      mdn, // ✅ Add mdn here
+      mdn,
       activationDate: new Date(),
-      endDateOfActivation: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-
+      endDateOfActivation,
       E911ADDRESS: {
         STREET1: E911ADDRESS.STREET1 || "",
         STREET2: E911ADDRESS.STREET2 || "",
@@ -522,5 +623,4 @@ router.post("/", async (req, res) => {
       .json(err?.response?.data || { error: "Unknown server error" });
   }
 });
-
 export default router;
