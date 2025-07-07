@@ -552,9 +552,14 @@ router.post("/", async (req, res) => {
     console.log("Calling external activation API with token:", bearerToken);
 
     // Call external activation API
+    const activationRequestBody = {
+      ...req.body,
+      planId: "01", // always send "01" to opncomm
+    };
+
     const activationResponse = await axios.post(
       "https://api.opncomm.com/opencom/api/v1/active",
-      req.body,
+      activationRequestBody,
       {
         headers: {
           Authorization: `Bearer ${bearerToken}`,
