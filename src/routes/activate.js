@@ -576,13 +576,13 @@ router.post("/", async (req, res) => {
       E911ADDRESS = {},
     } = req.body;
 
-    const mdn = activationResponse?.data?.data?.mdn || "";
+    const mdn = activationResponse?.data?.address_data?.mdn || "";
 
     // Calculate endDateOfActivation based on planId
     let endDateOfActivation = new Date();
-    if (planId === "Plan01") {
+    if (planId === "01") {
       endDateOfActivation.setDate(endDateOfActivation.getDate() + 30);
-    } else if (planId === "Plan012") {
+    } else if (planId === "012") {
       endDateOfActivation.setFullYear(endDateOfActivation.getFullYear() + 1);
     } else {
       // default to 30 days if unknown planId
