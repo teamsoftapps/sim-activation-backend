@@ -43,16 +43,31 @@ import userRoutes from "./src/routes/userRoutes.js";
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use(express.json());
 
+// app.use(
+//   cors({
+//     origin: "*",
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: [
+//       "Content-Type",
+//       "x-api-key",
+//       "Authorization",
+//       "Access-Control-Allow-Origin",
+//     ],
+//   })
+// );
+// app.options("*", cors());
+
 app.use(
   cors({
-    origin: "*",
+    origin: "https://www.jf-mobile.com", // allow only your frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       "Content-Type",
-      "x-api-key",
       "Authorization",
+      "x-api-key",
       "Access-Control-Allow-Origin",
     ],
+    credentials: true,
   })
 );
 app.options("*", cors());
