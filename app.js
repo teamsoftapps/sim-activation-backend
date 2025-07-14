@@ -61,12 +61,7 @@ app.use(
   cors({
     origin: "https://www.jf-mobile.com", // allow only your frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "x-api-key",
-      "Access-Control-Allow-Origin",
-    ],
+    allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
     credentials: true,
   })
 );
