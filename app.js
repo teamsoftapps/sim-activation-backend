@@ -59,7 +59,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "https://www.jf-mobile.com", // allow only your frontend
+    origin: ["https://www.jf-mobile.com", "http://localhost:3001"], // allow only your frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
     credentials: true,
