@@ -67,6 +67,8 @@ const router = express.Router();
 // });
 router.post("/", upload.any(), async (req, res) => {
   try {
+    console.log("req.body:", req.body);
+    console.log("Received bulk activation request");
     // Extract x-api-key from header
     const apiKey = req.headers["x-api-key"];
 
@@ -91,7 +93,7 @@ router.post("/", upload.any(), async (req, res) => {
     // You may also need to pass original file streams depending on your actual backend requirements.
 
     const response = await axios.post(
-      "https://api.opncomm.com/opencom/api/v1/bulk-active",
+      "https://api.opncomm.com/opencom/api/v1/bulk-activate-esn",
       formData,
       {
         headers: {
@@ -106,7 +108,7 @@ router.post("/", upload.any(), async (req, res) => {
     console.error("Bulk Activation Error:", err);
     res
       .status(err.response?.status || 500)
-      .json(err.response?.data || { error: "Unknown error" });
+      .json("unexpected error" || { error: "Unknown error" });
   }
 });
 export default router;

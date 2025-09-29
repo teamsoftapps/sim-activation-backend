@@ -108,6 +108,8 @@ router.post("/signin", async (req, res) => {
     // 1. Check Admin collection
     let account = await Admin.findOne({ email });
 
+    console.log("ADmin found", account);
+
     if (account) {
       const isPasswordValid = await bcrypt.compare(password, account.password);
       if (!isPasswordValid) {
@@ -129,6 +131,7 @@ router.post("/signin", async (req, res) => {
         success: true,
         message: "Admin signed in successfully",
         role: "admin",
+        apiKey: account.apiKey,
         token,
         account: {
           id: account._id,
@@ -140,6 +143,8 @@ router.post("/signin", async (req, res) => {
 
     // 2. Check User collection
     account = await User.findOne({ email });
+
+    console.log("🔍 Sign-in attempt for email:", account);
 
     if (!account) {
       return res
@@ -167,6 +172,7 @@ router.post("/signin", async (req, res) => {
       success: true,
       message: "User signed in successfully",
       role: "user",
+      apiKey: account.apiKey,
       token,
       account: {
         id: account._id,
