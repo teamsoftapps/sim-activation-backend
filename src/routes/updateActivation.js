@@ -37,4 +37,18 @@ router.put("/activations-by-email/:email/:esn", async (req, res) => {
   }
 });
 
+router.get("/apikeys", async (req, res) => {
+  try {
+    const users = await User.find(
+      { apiKey: { $exists: true, $ne: null, $ne: "" } },
+      { fullName: 1, apiKey: 1, _id: 0 }
+    ).lean();
+
+    res.json({ success: true, data: users });
+  } catch (err) {
+    console.error("GET /api/apikeys error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
 export default router;
