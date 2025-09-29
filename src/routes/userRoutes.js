@@ -100,6 +100,8 @@ router.get("/deactivations", async (req, res) => {
   try {
     const user = await User.findOne({ email }).lean();
 
+    console.log("user in deactivation api:", user);
+
     if (!user) {
       return res
         .status(404)
@@ -112,16 +114,18 @@ router.get("/deactivations", async (req, res) => {
       deactivationDate: deactivation.deactivationDate || null,
     }));
 
-    if (fromDate && toDate) {
-      const from = new Date(fromDate);
-      const to = new Date(new Date(toDate).setHours(23, 59, 59, 999));
-      deactivations = deactivations.filter((item) => {
-        if (!item.deactivationDate) return false;
-        const date = new Date(item.deactivationDate);
-        return date >= from && date <= to;
-      });
+    console.log("deactivations:", deactivations);
+    if (deactivations[deactivations.length - 1]?.deactivationDate !== null) {
+      if (fromDate && toDate) {
+        const from = new Date(fromDate);
+        const to = new Date(new Date(toDate).setHours(23, 59, 59, 999));
+        deactivations = deactivations.filter((item) => {
+          if (!item.deactivationDate) return false;
+          const date = new Date(item.deactivationDate);
+          return date >= from && date <= to;
+        });
+      }
     }
-
     return res.status(200).json({
       success: true,
       deactivations,
@@ -158,15 +162,17 @@ router.get("/reactivations", async (req, res) => {
       BillingCode: reactivation.BillingCode || null,
       reactivationDate: reactivation.reactivationDate || null,
     }));
-
-    if (fromDate && toDate) {
-      const from = new Date(fromDate);
-      const to = new Date(new Date(toDate).setHours(23, 59, 59, 999));
-      reactivations = reactivations.filter((item) => {
-        if (!item.reactivationDate) return false;
-        const date = new Date(item.reactivationDate);
-        return date >= from && date <= to;
-      });
+    console.log("reactivations:", reactivations);
+    if (reactivations[reactivations.length - 1]?.reactivationDate !== null) {
+      if (fromDate && toDate) {
+        const from = new Date(fromDate);
+        const to = new Date(new Date(toDate).setHours(23, 59, 59, 999));
+        reactivations = reactivations.filter((item) => {
+          if (!item.reactivationDate) return false;
+          const date = new Date(item.reactivationDate);
+          return date >= from && date <= to;
+        });
+      }
     }
 
     return res.status(200).json({

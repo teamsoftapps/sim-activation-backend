@@ -84,6 +84,7 @@ const Users = new mongoose.Schema({
     {
       esn: String,
       mdn: String,
+      deactivationDate: { type: Date, default: Date.now },
     },
   ],
   reactivation: [
@@ -93,6 +94,7 @@ const Users = new mongoose.Schema({
       plan: String,
       zip: String,
       BillingCode: String,
+      reactivationDate: { type: Date, default: Date.now },
     },
   ],
 
