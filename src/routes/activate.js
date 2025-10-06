@@ -555,7 +555,7 @@ router.post("/", async (req, res) => {
     // Call external activation API
     const activationRequestBody = {
       ...req.body,
-      planId: "01", // always send "01" to opncomm
+      // planId: "01",
     };
 
     const activationResponse = await axios.post(
@@ -631,4 +631,5 @@ router.post("/", async (req, res) => {
       .json(err?.response?.data || { error: "Unknown server error" });
   }
 });
+
 export default router;
