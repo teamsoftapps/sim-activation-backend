@@ -525,6 +525,7 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
+    console.log("Incoming request body:", req.body);
     const apiKey = req.headers["x-api-key"];
 
     if (!apiKey) {
@@ -577,6 +578,7 @@ router.post("/", async (req, res) => {
       planId,
       language,
       zip,
+      customerName,
       BillingCode,
       E911ADDRESS = {},
     } = req.body;
@@ -602,6 +604,7 @@ router.post("/", async (req, res) => {
       zip: zip || "",
       BillingCode: BillingCode || "",
       mdn,
+      customerName: customerName || "",
       activationDate: new Date(),
       endDateOfActivation,
       E911ADDRESS: {
