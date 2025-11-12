@@ -57,20 +57,29 @@ app.use(express.json());
 // );
 // app.options("*", cors());
 
+// app.use(
+//   cors({
+//     origin: [
+//       "https://www.jf-mobile.com",
+//       "http://localhost:3001",
+//       "http://localhost:3000",
+//       "*",
+//     ], // allow only your frontend
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+//     credentials: true,
+//   })
+// );
+// app.options("*", cors());
 app.use(
   cors({
-    origin: [
-      "https://www.jf-mobile.com",
-      "http://localhost:3001",
-      "http://localhost:3000",
-      "*",
-    ], // allow only your frontend
+    origin: "https://www.jf-mobile.com",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
-    credentials: true,
+    credentials: true, // needed if you use cookies or auth headers
   })
 );
-app.options("*", cors());
+app.options("*", cors()); // enable preflight for all routes
 
 // Serve static Swagger UI files manually
 app.use(
