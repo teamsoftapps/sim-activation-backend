@@ -1,24 +1,6 @@
 /** @format */
 
 import mongoose from 'mongoose';
-import { type } from 'os';
-
-const E911AddressSchema = new mongoose.Schema({
-  STREET1: String,
-  STREET2: String,
-  CITY: String,
-  STATE: String,
-  ZIP: String,
-});
-
-const ActivationDataSchema = new mongoose.Schema({
-  esn: String,
-  planId: String,
-  language: String,
-  zip: String,
-  BillingCode: String,
-  E911ADDRESS: E911AddressSchema,
-});
 
 const Users = new mongoose.Schema({
   fullName: {
@@ -44,15 +26,7 @@ const Users = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-
-  // apiKey: String,
   token: String,
-  opncommToken: {
-    type: String,
-    default:
-      'opencom_skdaf6d495-c91b-40ae-861e-0b24e5e826a2-ee526093-4713-43b9-a887-b96fc9a7c631',
-  },
-
   activationCost: {
     type: Number,
     default: 0,
@@ -73,7 +47,7 @@ const Users = new mongoose.Schema({
       endDateOfActivation: {
         type: Date,
         default: function () {
-          return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+          return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
         },
       },
       E911ADDRESS: {
