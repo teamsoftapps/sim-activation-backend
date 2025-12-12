@@ -1,3 +1,5 @@
+/** @format */
+
 // /** @format */
 
 // import express from "express";
@@ -303,10 +305,10 @@
 
 /** @format */
 
-import express from "express";
-import axios from "axios";
-import User from "../models/User.js";
-import dotenv from "dotenv";
+import express from 'express';
+import axios from 'axios';
+import User from '../models/User.js';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
@@ -523,13 +525,13 @@ const router = express.Router();
 //   }
 // });
 
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    console.log("Incoming request body:", req.body);
-    const apiKey = req.headers["x-api-key"];
+    console.log('Incoming request body:', req.body);
+    const apiKey = req.headers['x-api-key'];
 
     if (!apiKey) {
-      return res.status(400).json({ error: "Missing x-api-key in headers" });
+      return res.status(400).json({ error: 'Missing x-api-key in headers' });
     }
 
     // Fetch user from DB
@@ -537,20 +539,20 @@ router.post("/", async (req, res) => {
     if (!user) {
       return res
         .status(404)
-        .json({ error: "User not found with this API key" });
+        .json({ error: 'User not found with this API key' });
     }
 
     const bearerToken = user.opncommToken;
     if (!bearerToken) {
-      return res.status(400).json({ error: "Missing opncommToken for user" });
+      return res.status(400).json({ error: 'Missing opncommToken for user' });
     }
 
     const activationCost = user.activationCost ?? 0;
     if (user.credits < activationCost) {
-      return res.status(400).json({ error: "Insufficient credits" });
+      return res.status(400).json({ error: 'Insufficient credits' });
     }
 
-    console.log("Calling external activation API with token:", bearerToken);
+    console.log('Calling external activation API with token:', bearerToken);
 
     // Call external activation API
     const activationRequestBody = {
@@ -559,12 +561,12 @@ router.post("/", async (req, res) => {
     };
 
     const activationResponse = await axios.post(
-      "https://api.opncomm.com/opencom/api/v1/active",
+      'https://api.opncomm.com/opencom/api/v1/active',
       activationRequestBody,
       {
         headers: {
           Authorization: `Bearer ${bearerToken}`,
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
       }
     );
@@ -583,13 +585,13 @@ router.post("/", async (req, res) => {
       E911ADDRESS = {},
     } = req.body;
 
-    const mdn = activationResponse?.data?.address_data?.mdn || "";
+    const mdn = activationResponse?.data?.address_data?.mdn || '';
 
     // Calculate endDateOfActivation based on planId
     let endDateOfActivation = new Date();
-    if (planId === "01") {
+    if (planId === '01') {
       endDateOfActivation.setDate(endDateOfActivation.getDate() + 30);
-    } else if (planId === "012") {
+    } else if (planId === '012') {
       endDateOfActivation.setFullYear(endDateOfActivation.getFullYear() + 1);
     } else {
       // default to 30 days if unknown planId
@@ -598,37 +600,37 @@ router.post("/", async (req, res) => {
 
     // Save activation data
     user.activationData.push({
-      esn: esn || "",
-      planId: planId || "",
-      language: language || "",
-      zip: zip || "",
-      BillingCode: BillingCode || "",
+      esn: esn || '',
+      planId: planId || '',
+      language: language || '',
+      zip: zip || '',
+      BillingCode: BillingCode || '',
       mdn,
-      customerName: customerName || "",
+      customerName: customerName || '',
       activationDate: new Date(),
       endDateOfActivation,
       E911ADDRESS: {
-        STREET1: E911ADDRESS.STREET1 || "",
-        STREET2: E911ADDRESS.STREET2 || "",
-        CITY: E911ADDRESS.CITY || "",
-        STATE: E911ADDRESS.STATE || "",
-        ZIP: E911ADDRESS.ZIP || "",
+        STREET1: E911ADDRESS.STREET1 || '',
+        STREET2: E911ADDRESS.STREET2 || '',
+        CITY: E911ADDRESS.CITY || '',
+        STATE: E911ADDRESS.STATE || '',
+        ZIP: E911ADDRESS.ZIP || '',
       },
     });
 
     await user.save();
 
     res.json({
-      message: "Device activated and data saved. Credits deducted.",
+      message: 'Device activated and data saved. Credits deducted.',
       activationAPIResponse: activationResponse.data,
       activationData: user.activationData,
       remainingCredits: user.credits,
     });
   } catch (err) {
-    console.error("Activation Error:", err?.response?.data || err.message);
+    console.error('Activation Error:', err?.response?.data || err.message);
     res
       .status(err?.response?.status || 500)
-      .json(err?.response?.data || { error: "Unknown server error" });
+      .json(err?.response?.data || { error: 'Unknown server error' });
   }
 });
 

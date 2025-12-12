@@ -1,5 +1,7 @@
-import mongoose from "mongoose";
-import { type } from "os";
+/** @format */
+
+import mongoose from 'mongoose';
+import { type } from 'os';
 
 const E911AddressSchema = new mongoose.Schema({
   STREET1: String,
@@ -43,12 +45,12 @@ const Users = new mongoose.Schema({
     default: 0,
   },
 
-  apiKey: String,
+  // apiKey: String,
   token: String,
   opncommToken: {
     type: String,
     default:
-      "opencom_skdaf6d495-c91b-40ae-861e-0b24e5e826a2-ee526093-4713-43b9-a887-b96fc9a7c631",
+      'opencom_skdaf6d495-c91b-40ae-861e-0b24e5e826a2-ee526093-4713-43b9-a887-b96fc9a7c631',
   },
 
   activationCost: {
@@ -58,12 +60,15 @@ const Users = new mongoose.Schema({
 
   activationData: [
     {
-      esn: String,
-      planId: String,
-      language: String,
+      sim: String,
       zip: String,
-      BillingCode: String,
-      mdn: String,
+      plan_soc: String,
+      imei: String,
+      label: String,
+      transactionId: String,
+      accountId: String,
+      msisdn: String,
+      iccid: String,
       activationDate: { type: Date, default: Date.now },
       endDateOfActivation: {
         type: Date,
@@ -72,18 +77,20 @@ const Users = new mongoose.Schema({
         },
       },
       E911ADDRESS: {
-        STREET1: String,
-        STREET2: String,
-        CITY: String,
-        STATE: String,
-        ZIP: String,
+        e911AddressStreet1: String,
+        e911AddressStreet2: String,
+        e911AddressCity: String,
+        e911AddressState: String,
+        e911AddressZip: String,
       },
     },
   ],
   deactivationData: [
     {
-      esn: String,
-      mdn: String,
+      transactionId: String,
+      accountId: String,
+      msisdn: String,
+      iccid: String,
       deactivationDate: { type: Date, default: Date.now },
     },
   ],
@@ -104,5 +111,5 @@ const Users = new mongoose.Schema({
   },
 });
 
-const User = mongoose.model("User", Users);
+const User = mongoose.model('User', Users);
 export default User;
