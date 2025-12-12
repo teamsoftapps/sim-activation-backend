@@ -269,7 +269,7 @@ app.use('/add-wfc', apiKeyMiddleware, addWfc);
 
 // //Auth routes
 // app.use('/admin-user', adminUserControlRoutes);
-// app.use('/auth', signinRoutes);
+app.use('/auth', signinRoutes);
 // app.use('/auth/signup', signupRoutes);
 // app.use('/user', userRoutes);
 
