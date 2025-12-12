@@ -7,7 +7,17 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const router = express.Router();
+router.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-api-key");
+  
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
+  next();
+});
 router.post('/', async (req, res) => {
   try {
     console.log('Incoming request body:', req.body);
