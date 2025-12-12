@@ -60,15 +60,15 @@
 // // );
 // // app.options("*", cors());
 
-// // app.use(
-// //   cors({
-// //     origin: [
-// //       "https://www.jf-mobile.com",
-// //       "http://localhost:3001",
-// //       "http://localhost:3000",
-// //       "*",
-// //     ], // allow only your frontend
-// //     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+// app.use(
+//   cors({
+//     origin: [
+//       "https://www.jf-mobile.com",
+//       "http://localhost:3001",
+//       "http://localhost:3000",
+//       "*",
+//     ], // allow only your frontend
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 // //     allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
 // //     credentials: true,
 // //   })
@@ -222,8 +222,13 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    origin: [
+      "https://www.jf-mobile.com",
+      "http://localhost:3001",
+      "http://localhost:3000",
+      "*",
+    ], // allow only your frontend
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: [
       'Content-Type',
       'Authorization',
