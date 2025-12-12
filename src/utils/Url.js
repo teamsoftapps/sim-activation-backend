@@ -1,0 +1,1 @@
+export const URL= "https://prodapitmo1.321communications.com/api/tmo/v1"

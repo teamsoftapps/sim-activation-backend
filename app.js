@@ -233,7 +233,7 @@ app.use(
       'Content-Type',
       'Authorization',
       'Access-Control-Allow-Origin',
-      'transaction-id,client-id,client-api-key,x-api-key',
+      'transaction-id,client-id,client-api-key,_id',
     ],
     credentials: true, // needed if you use cookies or auth headers
   })
@@ -273,14 +273,14 @@ app.use('/add-wfc', apiKeyMiddleware, addWfc);
 // app.use('/update-e911address', apiKeyMiddleware, updateE911address);
 
 // //Auth routes
-// app.use('/admin-user', adminUserControlRoutes);
+app.use('/admin-user', adminUserControlRoutes);
 app.use('/auth', signinRoutes);
-// app.use('/auth/signup', signupRoutes);
-// app.use('/user', userRoutes);
+app.use('/auth/signup', signupRoutes);
+app.use('/user', userRoutes);
 
 // //Get Activations
 // app.use('/get-activations', getActivations);
-// app.use('/admin-user', updateActivations);
+app.use('/admin-user', updateActivations);
 app.use('/activate', activateRoutes);
 // Server start
 const PORT = process.env.PORT || 5000;
