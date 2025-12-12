@@ -8,12 +8,15 @@ import bcrypt from 'bcrypt';
 
 const router = express.Router();
 
-router.get('/users', isAdmin, async (req, res) => {
+router.get('/users', async (req, res) => {
   try {
-    const users = await User.find().select('-password');
-    res.status(200).json({ success: true, users });
+    const users = await User.find().select(
+      '-password -activationData -deactivationData -reactivation'
+    );
+    return res.status(200).json({ success: true, users });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error(err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

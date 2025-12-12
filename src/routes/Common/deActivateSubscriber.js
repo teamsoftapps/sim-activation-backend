@@ -9,7 +9,8 @@ import generateTransactionId from '../../utils/generateTransactionId.js'; // you
 import dotenv from 'dotenv';
 
 dotenv.config();
-
+console.log('CLIENT_ID', process.env.CLIENT_ID);
+console.log('CLIENT_API_KEY', process.env.CLIENT_API_KEY);
 const router = express.Router();
 
 // POST /api/deactivate - Deactivate SIM (User or Admin)

@@ -7,7 +7,7 @@ dotenv.config();
 
 const app = express();
 
-import activatewithAddressRoutes from './src/routes/Common/activateSubscriberWithAddress.js';
+import activatewithAddress from './src/routes/Common/activateSubscriberWithAddress.js';
 import DeActivateSubscriber from './src/routes/Common/deActivateSubscriber.js';
 import UpdateE911address from './src/routes/Common/updateE911address.js';
 import adminUserControlRoutes from './src/routes/AdminRoutes/adminUserControlRoutes.js';
@@ -42,7 +42,7 @@ mongoose
   });
 
 //API Routes
-app.use('/activatewithAddressRoutes', activatewithAddressRoutes);
+app.use('/activatewithAddressRoutes', activatewithAddress);
 app.use('/DeActivateSubscriber', DeActivateSubscriber);
 app.use('/UpdateE911address', UpdateE911address);
 app.use('/add-wfc', addWfc);
