@@ -81,6 +81,8 @@ router.post('/', authMiddleware(), async (req, res) => {
 
     const data = response.data;
 
+    console.log('Reactivation responce:', data.accountId);
+
     // Save deactivation record
     targetUser.deactivationData = targetUser.deactivationData || [];
     targetUser.deactivationData.push({
