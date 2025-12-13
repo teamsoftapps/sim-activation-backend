@@ -97,8 +97,13 @@ app.use(
 app.options('*', cors());
 
 // Routes
+import ActivateSubscriber from './src/routes/Common/ActivateSubscriber.js';
 import activatewithAddress from './src/routes/Common/activateSubscriberWithAddress.js';
 import DeActivateSubscriber from './src/routes/Common/deActivateSubscriber.js';
+import ReActivateSubscriber from './src/routes/Common/ReActivateSubscriber.js';
+import AdjustBalance from './src/routes/Common/AdjustBalance.js';
+import CancelDeviceLocation from './src/routes/Common/CancelDeviceLocation.js';
+import CancelPortIn from './src/routes/Common/CancelPortIn.js';
 import UpdateE911address from './src/routes/Common/updateE911address.js';
 import adminUserControlRoutes from './src/routes/AdminRoutes/adminUserControlRoutes.js';
 import signinRoutes from './src/routes/Auth/signin.js';
@@ -106,8 +111,13 @@ import signupRoutes from './src/routes/Auth/signup.js';
 import userRoutes from './src/routes/UserRoutes/userRoutes.js';
 import addWfc from './src/routes/Common/addWfc.js';
 
+app.use('/ActivateSubscriber', ActivateSubscriber);
 app.use('/activatewithAddressRoutes', activatewithAddress);
+app.use('/ReActivateSubscriber', ReActivateSubscriber);
 app.use('/DeActivateSubscriber', DeActivateSubscriber);
+app.use('/AdjustBalance', AdjustBalance);
+app.use('/CancelDeviceLocation', CancelDeviceLocation);
+app.use('/CancelPortIn', CancelPortIn);
 app.use('/UpdateE911address', UpdateE911address);
 app.use('/add-wfc', addWfc);
 app.use('/auth', signinRoutes);

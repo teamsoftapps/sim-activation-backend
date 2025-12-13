@@ -62,7 +62,6 @@ const Users = new mongoose.Schema({
   deactivationData: [
     {
       transactionId: String,
-      accountId: String,
       msisdn: String,
       iccid: String,
       deactivationDate: { type: Date, default: Date.now },
@@ -76,6 +75,87 @@ const Users = new mongoose.Schema({
       zip: String,
       BillingCode: String,
       reactivationDate: { type: Date, default: Date.now },
+    },
+  ],
+
+  e911Updates: [
+    {
+      msisdn: String,
+      iccid: String,
+      e911Address: {
+        e911AddressStreet1: String,
+        e911AddressStreet2: String,
+        e911AddressCity: String,
+        e911AddressState: String,
+        e911AddressZip: String,
+      },
+      transactionId: String,
+      updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      updatedByRole: { type: String, enum: ['user', 'admin'] },
+      updatedAt: { type: Date, default: Date.now },
+    },
+  ],
+
+  balanceAdjustments: [
+    {
+      adjustedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Admin', // Only Admin can be referenced here
+        required: false,
+      },
+      adjustedByUser: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // If a regular user adjusts their own
+        required: false,
+      },
+      adjustedByName: String,
+      adjustedByType: {
+        type: String,
+        enum: ['admin', 'user'],
+        required: true,
+      },
+      msisdn: String,
+      iccid: String,
+      uom: {
+        type: String,
+        enum: ['MBYTES', 'MINUTES', 'MESSAGES'],
+        required: true,
+      },
+      bucketValue: { type: Number, required: true },
+      bucketForDataTopUp: { type: String, enum: ['A', 'B'], default: 'A' },
+      previousBalance: Number,
+      adjustment: Number,
+      newBalance: Number,
+      status: String,
+      transactionId: String,
+      adjustedAt: { type: Date, default: Date.now },
+    },
+  ],
+
+  deviceLocationCancellations: [
+    {
+      msisdn: String,
+      iccid: String,
+      imsi: String,
+      status: String,
+      transactionId: String,
+      cancelledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+      cancelledByType: { type: String, enum: ['user', 'admin'] },
+      cancelledAt: { type: Date, default: Date.now },
+    },
+  ],
+  portInCancellations: [
+    {
+      iccid: String,
+      portInMsisdn: String,
+      msisdn: String,
+      status: String,
+      portInRequestId: String,
+      portInDueDate: Date,
+      transactionId: String,
+      cancelledBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+      cancelledByType: { type: String, enum: ['user', 'admin'] },
+      cancelledAt: { type: Date, default: Date.now },
     },
   ],
 

@@ -3,12 +3,11 @@
 import express from 'express';
 import axios from 'axios';
 import User from '../../models/User.js';
-import Activation from '../../models/Activation.js'; // ← Separate model
-import E911Update from '../../models/E911Update.js'; // ← Separate model
 import authMiddleware from '../../middleware/authMiddleware.js';
 import authUser from '../../utils/authUser.js';
 import generateTransactionId from '../../utils/generateTransactionId.js';
 import dotenv from 'dotenv';
+import Reactivation from '../../models/Reactivation.js';
 
 dotenv.config();
 
@@ -25,7 +24,7 @@ router.post('/', authMiddleware(), async (req, res) => {
       });
     }
 
-    const { userId, msisdn, iccid, e911Address } = req.body;
+    const { userId, msisdn, iccid, marketZip, plan_soc } = req.body;
 
     // === Validation ===
     if (!msisdn && !iccid) {
@@ -34,20 +33,15 @@ router.post('/', authMiddleware(), async (req, res) => {
         message: 'At least one of msisdn or iccid is required',
       });
     }
-
-    if (!e911Address || typeof e911Address !== 'object') {
-      return res.status(400).json({
-        success: false,
-        message: 'e911Address object is required',
-      });
+    if (!plan_soc) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'plan_soc is required' });
     }
-
-    const { street1, street2, city, state, zip } = e911Address;
-    if (!street1 || !city || !state || !zip) {
-      return res.status(400).json({
-        success: false,
-        message: 'street1, city, state, and zip are required in e911Address',
-      });
+    if (!marketZip) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'marketZip is required' });
     }
 
     // === Determine target user ===
@@ -73,20 +67,15 @@ router.post('/', authMiddleware(), async (req, res) => {
     const payload = {
       msisdn: msisdn || '',
       iccid: iccid || '',
-      e911Address: {
-        street1,
-        street2: street2 || '',
-        city,
-        state,
-        zip,
-      },
+      marketZip,
+      plan_soc,
     };
 
-    // === Call Carrier API ===
+    // === Call Carrier API with full error isolation ===
     let carrierResponse;
     try {
       carrierResponse = await axios.post(
-        `${process.env.BASE_URL}/UpdateE911Address`,
+        `${process.env.BASE_URL}/ReactivateSubscriber`,
         payload,
         {
           headers: {
@@ -95,21 +84,22 @@ router.post('/', authMiddleware(), async (req, res) => {
             'transaction-id': transactionId,
             'Content-Type': 'application/json',
           },
-          timeout: 20000,
+          timeout: 25000,
         }
       );
     } catch (axiosErr) {
       return res.status(axiosErr.response?.status || 500).json({
         success: false,
-        message: 'E911 update failed at carrier',
+        message: 'Reactivation failed at carrier (network/carrier error)',
         transactionId,
         error: axiosErr.response?.data || { message: axiosErr.message },
       });
     }
 
-    const data = carrierResponse.data;
+    const apiResponse = carrierResponse.data;
+    const data = apiResponse.data || {};
 
-    // === Check for carrier error ===
+    // === Check for carrier-level error ===
     const hasError =
       data.status === 'ERROR' ||
       data.status === 'FAILED' ||
@@ -118,69 +108,60 @@ router.post('/', authMiddleware(), async (req, res) => {
         data.result.some((r) => r.status === 'ERROR' || r.status === 'FAILED'));
 
     if (hasError) {
+      // DO NOT save reactivation record
       return res.status(400).json({
         success: false,
-        message: 'E911 address update failed at carrier',
+        message: 'Reactivation failed at carrier',
         transactionId,
         carrierError: data.error || data.result || 'Unknown carrier error',
-        apiResponse: data,
+        apiResponse,
       });
     }
 
-    // === SUCCESS: Save audit log to separate collection ===
-    await E911Update.create({
-      user: targetUser._id,
-      updatedBy: authenticatedUser._id,
-      updatedByRole: type,
-      msisdn: msisdn || '',
-      iccid: iccid || '',
-      e911Address: payload.e911Address,
+    // === SUCCESS: Only save when carrier confirms reactivation ===
+
+    await Reactivation.create({
+      user: targetUser._id, // ← Link to the user who owns the line
+      reactivatedBy: authenticatedUser._id, // ← Who performed the reactivation
+      reactivatedByRole: type,
+      msisdn: data.msisdn || msisdn || '',
+      iccid: data.iccid || iccid || '',
+      plan: plan_soc,
+      zip: marketZip,
       transactionId,
-      updatedAt: new Date(),
+      accountId: data.accountId || '',
+      status: data.status || 'SUCCESS',
+      result: data.result || [],
+      error: null,
+      reactivationDate: new Date(),
+      reactivatedBy: authenticatedUser._id,
+      reactivatedByRole: type,
     });
-
-    // === Optional: Update the main Activation record for fast access ===
-    const activationEntry = await Activation.findOne({
-      user: targetUser._id,
-      $or: [{ msisdn }, { iccid }],
-    });
-
-    if (activationEntry) {
-      activationEntry.E911ADDRESS = {
-        e911AddressStreet1: street1,
-        e911AddressStreet2: street2 || '',
-        e911AddressCity: city,
-        e911AddressState: state,
-        e911AddressZip: zip,
-      };
-      activationEntry.e911UpdatedAt = new Date();
-      activationEntry.e911UpdatedBy = authenticatedUser._id;
-      activationEntry.e911UpdatedByRole = type;
-
-      await activationEntry.save();
-    }
 
     // === Final Success Response ===
     res.json({
       success: true,
-      message: 'E911 address updated successfully',
-      updatedBy: {
+      message: 'Line reactivated successfully',
+      reactivatedBy: {
         type,
         id: authenticatedUser._id,
         name: authenticatedUser.fullName || authenticatedUser.email,
       },
-      updatedFor: {
+      reactivatedFor: {
         userId: targetUser._id,
         email: targetUser.email,
       },
       transactionId,
-      line: { msisdn: msisdn || 'N/A', iccid: iccid || 'N/A' },
-      e911Address: payload.e911Address,
+      line: {
+        msisdn: data.msisdn || msisdn || 'N/A',
+        iccid: data.iccid || iccid || 'N/A',
+      },
       status: data.status || 'SUCCESS',
-      apiResponse: data,
+      portInRequestId: data.portInRequestId || null,
+      apiResponse,
     });
   } catch (err) {
-    console.error('Update E911 Internal Error:', err);
+    console.error('Reactivate Internal Error:', err);
     res.status(500).json({
       success: false,
       message: 'Internal server error',

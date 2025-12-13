@@ -3,21 +3,20 @@
 import express from 'express';
 import axios from 'axios';
 import User from '../../models/User.js';
+import Activation from '../../models/Activation.js';
+import E911Update from '../../models/E911Update.js';
 import authMiddleware from '../../middleware/authMiddleware.js';
 import authUser from '../../utils/authUser.js';
-import generateTransactionId from '../../utils/generateTransactionId.js'; // your 12-digit function
+import generateTransactionId from '../../utils/generateTransactionId.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
-console.log('CLIENT_ID', process.env.CLIENT_ID);
-console.log('CLIENT_API_KEY', process.env.CLIENT_API_KEY);
+
 const router = express.Router();
 
-// POST /api/deactivate - Deactivate SIM (User or Admin)
 router.post('/', authMiddleware(), async (req, res) => {
   try {
-    // Detect who is making the request
-    const { user: authenticatedUser, type, isAdmin, isUser } = authUser(req);
+    const { user: authenticatedUser, type, isAdmin } = authUser(req);
 
     if (!authenticatedUser) {
       return res.status(401).json({
@@ -26,35 +25,9 @@ router.post('/', authMiddleware(), async (req, res) => {
       });
     }
 
-    console.log(
-      `Deactivation request by ${type.toUpperCase()}:`,
-      authenticatedUser.email || authenticatedUser.fullName
-    );
+    const { userId, msisdn, iccid, e911Address } = req.body;
 
-    // Determine target user (who owns the SIM)
-    let targetUser;
-
-    if (isAdmin && req.body.userId) {
-      // Admin deactivating on behalf of a user
-      targetUser = await User.findById(req.body.userId);
-      if (!targetUser) {
-        return res.status(404).json({
-          success: false,
-          message: 'Target user not found',
-        });
-      }
-    } else if (isUser) {
-      // Regular user deactivating their own SIM
-      targetUser = authenticatedUser;
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Admin must provide "userId" in body',
-      });
-    }
-
-    const { msisdn, iccid } = req.body;
-
+    // === Validation ===
     if (!msisdn && !iccid) {
       return res.status(400).json({
         success: false,
@@ -62,63 +35,143 @@ router.post('/', authMiddleware(), async (req, res) => {
       });
     }
 
-    // Generate 12-digit numeric transaction ID
-    const transactionId = generateTransactionId(); // e.g., "000000123456" or "170248392174"
+    if (!e911Address || typeof e911Address !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: 'e911Address object is required',
+      });
+    }
 
-    // Call external deactivation API
-    const response = await axios.post(
-      `${process.env.BASE_URL}/DeActivateSubscriber`,
-      req.body,
-      {
-        headers: {
-          'client-api-key': process.env.CLIENT_API_KEY,
-          'client-id': process.env.CLIENT_ID,
-          'transaction-id': transactionId,
-          'Content-Type': 'application/json',
-        },
+    const { street1, street2 = '', city, state, zip } = e911Address;
+
+    if (!street1 || !city || !state || !zip) {
+      return res.status(400).json({
+        success: false,
+        message: 'street1, city, state, and zip are required in e911Address',
+      });
+    }
+
+    // === Determine target user ===
+    let targetUser;
+    if (isAdmin) {
+      if (!userId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'userId required for admin' });
       }
-    );
+      targetUser = await User.findById(userId);
+      if (!targetUser) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'User not found' });
+      }
+    } else {
+      targetUser = authenticatedUser;
+    }
 
-    const data = response.data;
+    const transactionId = generateTransactionId();
 
-    console.log('Reactivation responce:', data.accountId);
-
-    // Save deactivation record
-    targetUser.deactivationData = targetUser.deactivationData || [];
-    targetUser.deactivationData.push({
-      transactionId,
-      accountId: data.accountId || data.AccountId || '',
+    const payload = {
       msisdn: msisdn || '',
       iccid: iccid || '',
-      deactivationDate: new Date(),
+      e911Address: { street1, street2, city, state, zip },
+    };
+
+    // === Call Carrier API ===
+    let carrierResponse;
+    try {
+      carrierResponse = await axios.post(
+        `${process.env.BASE_URL}/UpdateE911Address`,
+        payload,
+        {
+          headers: {
+            'client-api-key': process.env.CLIENT_API_KEY,
+            'client-id': process.env.CLIENT_ID,
+            'transaction-id': transactionId,
+            'Content-Type': 'application/json',
+          },
+          timeout: 20000,
+        }
+      );
+    } catch (axiosErr) {
+      return res.status(axiosErr.response?.status || 500).json({
+        success: false,
+        message: 'E911 update failed at carrier',
+        transactionId,
+        error: axiosErr.response?.data || { message: axiosErr.message },
+      });
+    }
+
+    const data = carrierResponse.data;
+
+    // === Check for carrier error ===
+    const hasError =
+      ['ERROR', 'FAILED'].includes(data.status) ||
+      data.error ||
+      (Array.isArray(data.result) &&
+        data.result.some((r) => ['ERROR', 'FAILED'].includes(r.status)));
+
+    if (hasError) {
+      return res.status(400).json({
+        success: false,
+        message: 'E911 address update failed at carrier',
+        transactionId,
+        carrierError: data.error || data.result || 'Unknown carrier error',
+        apiResponse: data,
+      });
+    }
+
+    // === SUCCESS: Save audit log ===
+    await E911Update.create({
+      user: targetUser._id,
+      updatedBy: authenticatedUser._id,
+      updatedByRole: type,
+      msisdn: msisdn || '',
+      iccid: iccid || '',
+      e911Address: payload.e911Address,
+      transactionId,
+      updatedAt: new Date(),
     });
 
-    await targetUser.save();
+    // === Update main Activation record (for fast dashboard access) ===
+    const activationEntry = await Activation.findOne({
+      user: targetUser._id,
+      $or: [{ msisdn }, { iccid }],
+    });
 
-    // Success response
+    if (activationEntry) {
+      activationEntry.E911ADDRESS = payload.e911Address;
+      activationEntry.e911UpdatedAt = new Date();
+      activationEntry.e911UpdatedBy = authenticatedUser._id;
+      activationEntry.e911UpdatedByRole = type;
+      await activationEntry.save();
+    }
+
+    // === Success Response ===
     res.json({
       success: true,
-      message: 'SIM deactivated successfully',
-      deactivatedBy: {
+      message: 'E911 address updated successfully',
+      updatedBy: {
         type,
         id: authenticatedUser._id,
         name: authenticatedUser.fullName || authenticatedUser.email,
       },
-      deactivatedFor: {
+      updatedFor: {
         userId: targetUser._id,
         email: targetUser.email,
       },
       transactionId,
-      line: { msisdn, iccid },
-      deactivationResponse: data,
+      line: { msisdn: msisdn || 'N/A', iccid: iccid || 'N/A' },
+      e911Address: payload.e911Address,
+      status: data.status || 'SUCCESS',
+      apiResponse: data,
     });
   } catch (err) {
-    console.error('Deactivation Error:', err.response?.data || err.message);
-
-    return res.status(err.response?.status || 500).json({
+    console.error('Update E911 Internal Error:', err);
+    res.status(500).json({
       success: false,
-      error: 'Deactivation failed',
-      details: err.response?.data || { message: err.message },
+      message: 'Internal server error',
+      error: err.message,
     });
   }
 });
