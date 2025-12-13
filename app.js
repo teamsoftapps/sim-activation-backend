@@ -105,6 +105,8 @@ import signinRoutes from './src/routes/Auth/signin.js';
 import signupRoutes from './src/routes/Auth/signup.js';
 import userRoutes from './src/routes/UserRoutes/userRoutes.js';
 import addWfc from './src/routes/Common/addWfc.js';
+import bulkActivateSubscriberWithAddress from './src/routes/Common/bulkActivateSubscriberWithAddress.js';
+import ActivateSubscriber from './src/routes/Common/ActivateSubscriber.js';
 
 app.use('/activatewithAddressRoutes', activatewithAddress);
 app.use('/DeActivateSubscriber', DeActivateSubscriber);
@@ -114,7 +116,8 @@ app.use('/auth', signinRoutes);
 app.use('/auth/signup', signupRoutes);
 app.use('/admin-user', adminUserControlRoutes);
 app.use('/user', userRoutes);
-
+app.use('/bulkActivateSubscriberWithAddress',bulkActivateSubscriberWithAddress)
+app.use("/activateSubscriber",ActivateSubscriber)
 // Test route
 app.get('/', (req, res) => {
   res.send('Hello World!');
