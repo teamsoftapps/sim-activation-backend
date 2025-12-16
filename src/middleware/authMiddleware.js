@@ -28,6 +28,8 @@ const authMiddleware = (options = { requireAdmin: false }) => {
       // Verify JWT
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+      console.log('decoded user:', decoded);
+
       let authenticatedEntity = null;
 
       // First try to find as Admin
