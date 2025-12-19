@@ -50,7 +50,9 @@ import userRoutes from './src/routes/UserRoutes/userRoutes.js';
 import addWfc from './src/routes/Common/addWfc.js';
 import bulkActivateSubscriberWithAddress from './src/routes/Common/bulkActivateSubscriberWithAddress.js';
 import ActivationReport from './src/routes/Reports/ActivationReport.js';
-
+import bulkDeactivateSubscriber from './src/routes/Common/bulkDeactivateSubscriber.js';
+import bulkReactivateSubscriber from './src/routes/Common/bulkReactivateSubscriber.js';
+import bulkUpdateE911 from './src/routes/Common/bulkUpdateE911.js';
 app.use('/ActivateSubscriber', ActivateSubscriber);
 app.use('/activatewithAddressRoutes', activatewithAddress);
 app.use('/ReActivateSubscriber', ReActivateSubscriber);
@@ -69,7 +71,18 @@ app.use(
   bulkActivateSubscriberWithAddress
 );
 app.use('/activateSubscriber', ActivateSubscriber);
-
+app.use(
+  '/bulkDeactivateSubscriber',
+  bulkDeactivateSubscriber
+);
+app.use(
+  '/bulkReactivateSubscriber',
+  bulkReactivateSubscriber
+);
+app.use(
+  '/bulkUpdateE911Address',
+  bulkUpdateE911
+);
 // Report Routes
 app.use('/activationReport', ActivationReport);
 // Test route
