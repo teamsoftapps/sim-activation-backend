@@ -52,10 +52,25 @@ import bulkActivateSubscriberWithAddress from './src/routes/Common/bulkActivateS
 import ActivationReport from './src/routes/Reports/ActivationReport.js';
 import bulkDeactivateSubscriber from './src/routes/Common/bulkDeactivateSubscriber.js';
 import bulkReactivateSubscriber from './src/routes/Common/bulkReactivateSubscriber.js';
+import GetActivePlanSOC from './src/routes/Common/GetActivePlanSOC.js';
 import bulkUpdateE911 from './src/routes/Common/bulkUpdateE911.js';
+import QueryPortInStatus from './src/routes/Common/QueryPortInStatus.js';
+import CheckPortInEligibility from './src/routes/Common/CheckPortInEligibility.js';
+import QueryNetwork from './src/routes/Common/QueryNetwork.js';
+import CheckNetworkCoverage from './src/routes/Common/CheckNetworkCoverage.js';
+import Portoutvalidation from './src/routes/Common/Portoutvalidation.js';
+import PortoutDeactivation from './src/routes/Common/Portoutdeactivation.js';
+// import CancelDeviceLocation from './src/routes/Common/CancelDeviceLocation.js';
+
+
+app.use('/CheckPortInEligibility', CheckPortInEligibility);
 app.use('/ActivateSubscriber', ActivateSubscriber);
+app.use("/QueryNetwork", QueryNetwork);
+app.use("/CheckNetworkCoverage", CheckNetworkCoverage);
 app.use('/activatewithAddressRoutes', activatewithAddress);
 app.use('/ReActivateSubscriber', ReActivateSubscriber);
+app.use('/GetActivePlanSOC', GetActivePlanSOC);
+app.use('/QueryPortInStatus', QueryPortInStatus);
 app.use('/DeActivateSubscriber', DeActivateSubscriber);
 app.use('/AdjustBalance', AdjustBalance);
 app.use('/CancelDeviceLocation', CancelDeviceLocation);
@@ -65,6 +80,9 @@ app.use('/add-wfc', addWfc);
 app.use('/auth', signinRoutes);
 app.use('/auth/signup', signupRoutes);
 app.use('/admin-user', adminUserControlRoutes);
+app.use('/Portoutvalidation', Portoutvalidation);
+app.use('/PortoutDeactivation', PortoutDeactivation);
+app.use('/CancelDeviceLocation',CancelDeviceLocation);
 app.use('/user', userRoutes);
 app.use(
   '/bulkActivateSubscriberWithAddress',
