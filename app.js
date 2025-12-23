@@ -200,11 +200,20 @@ import QueryeSIMProfileStatus from './src/routes/Common/QueryeSIMProfileStatus.j
 import QueryImei from './src/routes/Common/QueryImei.js';
 import QueryProducts from './src/routes/Common/QueryProduct.js';
 import QuerySim from './src/routes/Common/QuerySim.js';
-
+import ManagePhoneList from './src/routes/Common/ManagePhoneList.js';
+import AccountQuery from './src/routes/Common/QueryAccount.js';
+import QueryCim from './src/routes/Common/QueryCim.js';
+import SubscriberInquiry from './src/routes/Common/SubscriberInquiry.js';
+import SendSms from './src/routes/Common/SendSms.js';
+import NGPInquiry from './src/routes/Common/NGPInquiry.js';
+import UpdatePornin from './src/routes/Common/UpdatePortIn.js';
 // Auth Routes
 import signinRoutes from './src/routes/Auth/signin.js';
+import CreatePortInByPlanSOC from './src/routes/Common/CreatePortInByPlanSOC.js';
 import signupRoutes from './src/routes/Auth/signup.js';
-
+import Products from './src/routes/Common/Products.js';
+import ProductsWithAddressUpdate from './src/routes/Common/ProductsWithAddressUpdate.js';
+// import AdjustBalance from './src/routes/Common/AdjustBalance.js';
 // Admin Routes
 import adminUserControlRoutes from './src/routes/AdminRoutes/adminUserControlRoutes.js';
 
@@ -217,8 +226,14 @@ import ActivationReport from './src/routes/Reports/ActivationReport.js';
 // === ROUTES ===
 
 // Common
+app.use("/CreatePortInByPlanSOC", CreatePortInByPlanSOC);
+app.use('/ProductsWithAddressUpdate', ProductsWithAddressUpdate);
+app.use("/SendSms", SendSms);
+app.use("/UpdatePortIn", UpdatePornin);
+app.use("/NGPInquiry",NGPInquiry)
 app.use('/QuerySim', QuerySim);
-
+app.use('/Products', Products);
+app.use('/ManagePhoneList', ManagePhoneList);
 app.use('/ActivateSubscriber', ActivateSubscriber);
 app.use('/activateSubscriberWithAddress', activatewithAddress);
 app.use('/DeActivateSubscriber', DeActivateSubscriber);
@@ -243,7 +258,13 @@ app.use('/QueryDevice', QueryDevice);
 app.use('/QueryUnlockStatus', QueryUnlockStatus);
 app.use('/QueryeSIMProfileStatus', QueryeSIMProfileStatus);
 app.use('/QueryImei', QueryImei);
+app.use('/QueryProducts', QueryProducts);
+app.use("/AccountQuery", AccountQuery);
+app.use("/QueryCIM", QueryCim);
 app.use('/QueryProduct', QueryProducts);
+app.use('/QuerySim', QuerySim);
+app.use('/ManagePhoneList', ManagePhoneList);
+app.use("/SubscriberInquiry", SubscriberInquiry);
 
 // Auth
 app.use('/auth', signinRoutes);
