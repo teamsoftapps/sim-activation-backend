@@ -199,6 +199,7 @@ import QueryUnlockStatus from './src/routes/Common/QueryUnlockStatus.js';
 import QueryeSIMProfileStatus from './src/routes/Common/QueryeSIMProfileStatus.js';
 import QueryImei from './src/routes/Common/QueryImei.js';
 import QueryProducts from './src/routes/Common/QueryProduct.js';
+import QuerySim from './src/routes/Common/QuerySim.js';
 
 // Auth Routes
 import signinRoutes from './src/routes/Auth/signin.js';
@@ -216,6 +217,8 @@ import ActivationReport from './src/routes/Reports/ActivationReport.js';
 // === ROUTES ===
 
 // Common
+app.use('/QuerySim', QuerySim);
+
 app.use('/ActivateSubscriber', ActivateSubscriber);
 app.use('/activateSubscriberWithAddress', activatewithAddress);
 app.use('/DeActivateSubscriber', DeActivateSubscriber);
